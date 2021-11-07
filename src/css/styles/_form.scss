@@ -1,0 +1,101 @@
+.form {
+  // position: absolute;
+	// top: 0;
+	// bottom: 0;
+	// left: 0;
+	// right: 0;
+  width: 500px;
+  height: 366px;
+  margin: auto;
+
+  &__fieldset {
+    & .btn {
+      margin-left: 7.4em;
+    }
+  }
+
+  &__legend {
+    padding-top: 36px;
+    padding-bottom: 29px;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 40px;
+    text-align: center;
+
+  }
+
+  &__container {
+    display: flex;
+    flex-flow: column;
+    align-items: flex-end;
+    width: 85%;
+  }
+
+  &__label-box {
+    display: inline-block;
+    margin-right: 0;
+
+  }
+
+  &__label {
+    display: inline-block;
+    padding-right: 18px;
+    font-weight: 700;
+  }
+
+  &_trans {
+    width: 600px;
+    height: 288px;
+    grid-area: form;
+
+    & .form__container {
+      width: 100%;
+      margin-top: -2%;
+    }
+
+    & fieldset {
+      padding: 25px 50px;
+    }
+
+    & legend {
+      padding-top: 17px;
+      padding-bottom: 5px;
+      font-size: 20px;
+      text-align: left;
+    }
+
+    & .form__label-box {
+      padding-bottom: 25px;
+    }
+
+    & .btn {
+      margin-left: 12.4em;
+    }
+
+    & .form__label {
+    font-family: $ubuntu;
+    font-size: 14.9px;
+    font-weight: 600;
+    padding-right: 18px;
+
+  }
+}
+}
+
+fieldset {
+  border: none;
+}
+
+#login {
+  margin-bottom: 25px;
+}
+
+#password {
+  margin-bottom: 30px;
+}
+
+
+#accNum,
+#amountTrans {
+  display: inline-block;
+}
