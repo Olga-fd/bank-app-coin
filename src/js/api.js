@@ -1,7 +1,6 @@
 import {
   createListOfCards,
   createCardOfAccount,
-  checkAccount,
   getBalance,
 } from '../index.js';
 export let tokenId;
@@ -63,7 +62,6 @@ export async function getDataWithAccounts() {
     }),
   });
   let data = await response.json();
-  console.log(data);
   data.payload.forEach(() => createCardOfAccount(data));
 }
 
@@ -85,7 +83,5 @@ export async function getDataOfAccount() {
     }
   );
   let data = await response.json();
-  console.log(data.payload.transactions);
   getBalance(data);
-  //checkAccount(data);
 }

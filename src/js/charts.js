@@ -83,7 +83,7 @@ export function createChart(newArr) {
   let arr = transformedArr.map((y) => y - min);
   max = Math.max.apply(null, arr);
   let spotOn = arr.map((z) => (165 * z) / max);
-  console.log(spotOn);
+
   ctx.fillStyle = '#116acc';
   ctx.translate(0, canvas.height);
   ctx.rotate(-Math.PI / 2);

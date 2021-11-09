@@ -8,7 +8,9 @@ import { createChart } from './js/charts';
 import { format } from 'd3-format';
 //?episode_id=${object.results[num].episode_id}
 //const pageParams = new URLSearchParams(window.location.search);
+
 let f = format('.4s');
+
 function createLoginScreen() {
   history.pushState(null, '', '../index.html');
   const header = el('header.header');
@@ -192,75 +194,53 @@ export function createCardOfAccount(data) {
   });
 }
 
-export async function checkAccount(data, newArr, months) {
-  const title = document.querySelector('.main__title');
-  const block = document.querySelector('.main__block');
-  const btnTitle = document.querySelector('.main__btn_title');
-  const active = document.querySelector('.active');
-  const select = document.querySelector('.custom-select');
-  const mainWrap = document.querySelector('.main__wrap');
-  const plus = document.querySelector('.plus');
-  const blockOfData = el('.main__block-data');
-  const wrap = el('.wrap', [
-    el('p.main__account', `№ ${data.payload.account}`),
-    el('p.main__balance', 'Баланс', [
-      el(
-        'span.main__balance_amount',
-        `${data.payload.balance.toLocaleString('ru')} ₽`
-      ),
-    ]),
+//===Создаем блок с графиком===
+function createChartDynamics(newArr, months, dynamics) {
+  const titleChart = el('h4', 'Динамика баланса');
+  const chartBlock = el('.chart-block');
+  const chartWithLabels = el('.chartWithLabels');
+  const canvas = el(
+    'canvas#myChart',
+    { width: 510, height: 165 },
+    'Браузер не поддерживает Canvas'
+  );
+  const xAxis = el('.xAxis', {}, [
+    el('p.max', `${f(Math.max.apply(null, newArr))}`),
+    el('p', `${f(Math.min.apply(null, newArr))}`),
   ]);
+  const yAxis = el('.yAxis');
+  setChildren(
+    yAxis,
+    months.map((month) => el('span', month))
+  );
+  setChildren(chartWithLabels, [canvas, xAxis]);
+  setChildren(chartBlock, [chartWithLabels, yAxis]);
+  setChildren(dynamics, [titleChart, chartBlock]);
 
-  const dynamics = el('section.main__dynamics', [
-    el('h4', 'Динамика баланса'),
-    el('.chart-block', [
-      el('.labels-x', [
-        el(
-          'canvas#myChart',
-          { width: 510, height: 165 },
-          'Браузер не поддерживает Canvas'
-        ),
-        el('.xAxis', {}, [
-          el('p.max', `${f(Math.max.apply(null, newArr))}`),
-          el('p', `${f(Math.min.apply(null, newArr))}`),
-        ]),
-      ]),
+  return dynamics;
+}
 
-      el('.yAxis', {}, [
-        el('span', months[0]),
-        el('span', months[1]),
-        el('span', months[2]),
-        el('span', months[3]),
-        el('span', months[4]),
-        el('span', months[5]),
-      ]),
-    ]),
-  ]);
-  const transactions = data.payload.transactions;
-
-  const form = el('form.form_trans', { class: 'options' });
-  const historyOfTransactions = el('.main__history', { class: 'options' });
-  const h4 = el('h4', 'История переводов');
+//===Создаем таблицу с историей транзакций===
+function createTableOfHistory(data, historyOfTransactions) {
+  const transactions = data.payload.transactions.reverse();
+  const titleOfTable = el('h4', 'История переводов');
   const table = el('table');
+  const tbody = el('tbody');
   const thead = el('thead', [
     el('tr', [
       el('td', 'Счет отправителя'),
       el('td', 'Счет получателя'),
       el('td', 'Сумма'),
       el('td', 'Дата'),
-      el('td'),
-      el('td'),
-      el('td'),
-      el('td'),
     ]),
   ]);
-  setChildren(table, [
-    thead,
+  setChildren(
+    tbody,
     transactions.map((item) =>
       el('tr', [
-        el('td', item.from),
+        el('td', { class: 'js-transFrom' }, item.from),
         el('td', item.to),
-        el('td', item.amount),
+        el('td', { class: 'js-amountTrans' }, item.amount),
         el(
           'td',
           new Date(`${item.date}`).toLocaleString('ru', {
@@ -270,18 +250,15 @@ export async function checkAccount(data, newArr, months) {
           })
         ),
       ])
-    ),
-  ]);
+    )
+  );
+  setChildren(table, [thead, tbody]);
+  setChildren(historyOfTransactions, [titleOfTable, table]);
+  return historyOfTransactions;
+}
 
-  setChildren(historyOfTransactions, table);
-
-  title.textContent = 'Просмотр счета';
-  btnTitle.textContent = 'Вернуться назад';
-  setAttr(plus, { class: 'arrow' });
-  setStyle(mainWrap, { 'margin-bottom': '19px' });
-  active.classList.remove('active');
-  select.remove();
-
+//===Создаем форму транзакций===
+function createForm(form) {
   setChildren(form, [
     el('fieldset.form__fieldset', { class: '' }, [
       el('legend.form__legend', { class: '' }, 'Новый перевод'),
@@ -316,9 +293,52 @@ export async function checkAccount(data, newArr, months) {
       ),
     ]),
   ]);
+  return form;
+}
+
+export async function checkAccount(data, newArr, months) {
+  const title = document.querySelector('.main__title');
+  const block = document.querySelector('.main__block');
+  const btnTitle = document.querySelector('.main__btn_title');
+  const active = document.querySelector('.active');
+  const select = document.querySelector('.custom-select');
+  const mainWrap = document.querySelector('.main__wrap');
+  const plus = document.querySelector('.plus');
+  const blockOfData = el('.main__block-data');
+  const form = el('form.form_trans', { class: 'options' });
+  const dynamics = el('section.main__dynamics');
+  const historyOfTransactions = el('.main__history', { class: 'options' });
+  const wrap = el('.wrap', [
+    el('p.main__account', `№ ${data.payload.account}`),
+    el('p.main__balance', 'Баланс', [
+      el(
+        'span.main__balance_amount',
+        `${data.payload.balance.toLocaleString('ru')} ₽`
+      ),
+    ]),
+  ]);
+
+  title.textContent = 'Просмотр счета';
+  btnTitle.textContent = 'Вернуться назад';
+  setAttr(plus, { class: 'arrow' });
+  setStyle(mainWrap, { 'margin-bottom': '19px' });
+  active.classList.remove('active');
+  select.remove();
+
+  createChartDynamics(newArr, months, dynamics);
+  createForm(form);
+  createTableOfHistory(data, historyOfTransactions);
+
   setChildren(blockOfData, [form, dynamics, historyOfTransactions]);
   setChildren(block, [wrap, blockOfData]);
   createChart(newArr);
+  showTransactions(data);
+
+  let observer = new IntersectionObserver(showRow, options);
+  let visual = document.querySelectorAll('.js-visual');
+  let target = visual[visual.length - 1];
+
+  observer.observe(target);
 }
 
 export async function getBalance(data) {
@@ -379,3 +399,59 @@ function getMonths(currentDate, currentMonth, months) {
   }
   return months;
 }
+
+function showTransactions(data) {
+  const accountFrom = document.querySelectorAll('.js-transFrom');
+  const amount = document.querySelectorAll('.js-amountTrans');
+
+  for (let i = 0; i < accountFrom.length; i++) {
+    if (accountFrom[i].innerText == data.payload.account) {
+      amount[i].classList.add('expenses');
+      amount[i].textContent = `- ${Number(amount[i].innerText).toLocaleString(
+        'ru-RU'
+      )} ₽`;
+    } else {
+      amount[i].classList.add('receipts');
+      amount[i].textContent = `+ ${Number(amount[i].innerText).toLocaleString(
+        'ru-RU'
+      )} ₽`;
+    }
+  }
+  if (accountFrom.length > 25) {
+    for (let j = 0; j < accountFrom.length; j++) {
+      if (j < 25) {
+        accountFrom[j].parentNode.classList.add('js-visual');
+      } else {
+        accountFrom[j].parentNode.classList.add('visually-hidden');
+      }
+    }
+  }
+}
+
+// OBSERVER
+
+let options = {
+  root: document.querySelector('table'),
+  rootMargin: '0px',
+  threshold: 0,
+};
+
+function showRow(entries, observer) {
+  entries.forEach((entry) => {
+    const hidden = document.querySelectorAll('.visually-hidden');
+    if (entry.isIntersecting) {
+      for (let j = 0; j < 25; j++) {
+        hidden[j].classList.remove('visually-hidden');
+        hidden[j].classList.add('js-visual');
+      }
+    }
+
+    observer.unobserve(entry.target);
+    observer.observe(hidden[hidden.length - 1]);
+  });
+}
+
+// let observer = new IntersectionObserver(showRow, options);
+// let visual = document.querySelectorAll('.js-visual');
+// let target = visual[visual.length - 1];
+//observer.observe(target);
