@@ -402,22 +402,37 @@ button:disabled {
 
   &__block-data {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto;
     grid-template-areas: "form chart"
                          "history history";
     grid-auto-flow: column;
     gap: 50px;
+
+    &--new {
+      //display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+      grid-template-areas: "chart"
+                           "ratio"
+                           "history ";
+      //grid-auto-flow: column;
+      //gap: 50px;
+    }
   }
 
   &__dynamics {
-    position: relative;
     width: 684px;
+    grid-area: chart;
+  }
+
+  &__dynamics,
+  &__ratio {
+    position: relative;
     height: 288px;
     padding: 25px 50px;
     box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.25);
     border-radius: 50px;
-    grid-area: chart;
 
     & .yAxis span {
       padding-bottom: 25px;
@@ -431,6 +446,10 @@ button:disabled {
     min-height: 345px;
     grid-area: history;
     padding: 25px 50px;
+  }
+
+  &__ratio {
+    grid-area: ratio;
   }
 
   &__trans-block {
@@ -457,6 +476,13 @@ button:disabled {
     margin-bottom: 50px;
   }
 
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-auto-flow: row;
+  gap: 50px;
 }
 
 .plus, .arrow {
@@ -541,7 +567,7 @@ h4 {
 }
 
 
-#myChart {
+canvas {
   border: 1px solid black;
 }
 
@@ -549,7 +575,8 @@ h4 {
   position: absolute;
   top: 25%;
   left: 85%;
-  width: 50px;
+  //width: 50px;
+  width: 108px;
   height: 165px;
   display: flex;
   flex-flow: column;

@@ -1,18 +1,17 @@
 import { el, setChildren, setAttr, setStyle } from 'redom';
-import validator from 'validator';
 import './css/style.scss';
-import { authorize, getDataOfAccount } from './js/api.js';
+//import { showTemplate, createSkeleton } from './js/skeleton.js';
 //const checkWithMoonAlg = require('./moon.js');
 import { createSelect } from './js/select.js';
 import { createChart } from './js/charts';
 import { format } from 'd3-format';
+import { validate } from './js/handlers.js';
 //?episode_id=${object.results[num].episode_id}
 //const pageParams = new URLSearchParams(window.location.search);
 
-let f = format('.4s');
-
-function createLoginScreen() {
+async function createLoginScreen() {
   history.pushState(null, '', '../index.html');
+  let { validate, submitForm } = await import('./js/handlers.js');
   const header = el('header.header');
   const container = el('.container', { class: 'flex-container' });
   const fixContainer = el('.container');
@@ -62,61 +61,32 @@ function createLoginScreen() {
       ),
     ]),
   ]);
+  validate();
+  submitForm();
 }
 
 createLoginScreen();
 
-function delAttr() {
-  if (document.getElementsByClassName('success--border').length === 2) {
-    submit.removeAttribute('disabled', 'disabled');
-  }
-}
-
-const formInputs = document.querySelectorAll('.form__input');
-const submit = document.querySelector('[type="submit"]');
-
-formInputs.forEach((input) => {
-  input.addEventListener('blur', () => {
-    const lengthInput = validator.isLength(input.value, { min: 6 });
-    const space = validator.contains(input.value, ' ');
-
-    if (lengthInput == false || space == true) {
-      input.classList.add('error--border');
-    } else {
-      input.classList.add('success--border');
-    }
-
-    delAttr();
-  });
-});
-
-document.querySelector('form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const myLogin = document.getElementById('login').value.trim();
-  const myPassword = document.getElementById('password').value.trim();
-  authorize(myLogin, myPassword);
-});
-
-export function createListOfCards() {
+export async function createListOfCards() {
   history.pushState(null, '', '../index.html/accounts');
   const form = document.querySelector('form');
   const menu = document.querySelector('nav');
+  const template = el('template#template');
   const list = el('ul.header__list');
   const mainBlock = document.querySelector('.main .container');
   const mainWrap = el('.main__wrap');
   const title = el('h2.main__title', 'Ваши счета');
   const customSelect = el('.custom-select');
   const selectSort = el('select.main__select');
-  const btnCreate = el('button.btn', { class: 'main__btn' }, [
+  const btnCreate = el('button.btn', { class: 'main__btn js-new' }, [
     el('p', [
       el('span.plus'),
       el('span.main__btn_title', 'Создать новый счёт'),
     ]),
   ]);
-  const blockOfAccounts = el('.main__block');
-
+  const blockOfAccounts = el('.main__block', { class: 'grid' });
+  let { createNewAccount } = await import('./js/handlers.js');
   form.remove();
-
   setChildren(menu, list);
   setChildren(list, { class: '' }, [
     el('li.header__item', { class: 'list-reset' }, [
@@ -136,7 +106,7 @@ export function createListOfCards() {
       el('a.header__link', { href: '?logout' }, 'Выйти'),
     ]),
   ]);
-  setChildren(mainBlock, [mainWrap, blockOfAccounts]);
+  setChildren(mainBlock, [mainWrap, blockOfAccounts, template]);
   setChildren(mainWrap, [title, customSelect, btnCreate]);
   setChildren(customSelect, selectSort);
   setChildren(selectSort, [
@@ -146,67 +116,72 @@ export function createListOfCards() {
     el('option', 'По последней транзакции'),
   ]);
   createSelect();
-
-  // document.querySelector('.main__btn').addEventListener('click', () => {
-  //   createAccount();
-  // });
+  createNewAccount();
+  // createSkeleton(template, mainBlock, mainWrap, blockOfAccounts);
+  // showTemplate();
 }
 
-export function createCardOfAccount(data) {
+export async function createCardOfAccount(data) {
+  let { openAccount } = await import('./js/handlers.js');
   const blockOfAccounts = document.querySelector('.main__block');
-  const cardBlock = el('.main__card_block');
-  const date = new Date(data.payload[0].transactions[0].date)
-    .toLocaleString('ru', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    })
-    .slice(0, -2);
-  const card = el('.main__card');
-  const number = el('h3.main__card_number', data.payload[0].account);
-  const amount = el(
-    'p.main__card_balance',
-    `${data.payload[0].balance.toLocaleString('ru')} ₽`
-  );
-  const btnOpen = el(
-    'a.btn',
-    { class: 'main__btn-open', href: `?id=${data.payload[0].account}` },
-    'Открыть'
-  );
+  const cards = [];
 
-  const dateOfTransaction = el('div.main__trans-block', [
-    el('h4.main__transaction', 'Последняя транзакция:'),
-    el('time.main__trans-date', `${date}`),
-  ]);
+  for (let i = 0; i < data.payload.length; i++) {
+    let cardBlock = el('.main__card_block');
+    let date;
+    let length = data.payload[i].transactions.length;
+    if (length !== 0) {
+      date = new Date(data.payload[i].transactions[length - 1].date)
+        .toLocaleString('ru', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        })
+        .slice(0, -2);
+    } else {
+      date = 'Данные отсутствуют';
+    }
 
-  setChildren(blockOfAccounts, card);
-  setChildren(cardBlock, [dateOfTransaction, btnOpen]);
-  setChildren(card, [number, amount, cardBlock]);
-
-  document.querySelector('.main__btn-open').addEventListener('click', (e) => {
-    e.preventDefault();
-    history.pushState(
-      null,
-      '',
-      `../index.html/accounts?id=${data.payload[0].account}`
+    let card = el('.main__card');
+    let number = el('h3.main__card_number', data.payload[i].account);
+    let amount = el(
+      'p.main__card_balance',
+      `${data.payload[i].balance.toLocaleString('ru')} ₽`
     );
-    getDataOfAccount();
-  });
+    let btnOpen = el(
+      'a.btn',
+      { class: 'main__btn-open', href: `?id=${data.payload[i].account}` },
+      'Открыть'
+    );
+
+    let dateOfTransaction = el('div.main__trans-block', [
+      el('h4.main__transaction', 'Последняя транзакция:'),
+      el('time.main__trans-date', `${date}`),
+    ]);
+    setChildren(cardBlock, [dateOfTransaction, btnOpen]);
+    setChildren(card, [number, amount, cardBlock]);
+    setChildren(blockOfAccounts, card);
+    cards.push(card);
+  }
+  setChildren(blockOfAccounts, cards);
+  openAccount(blockOfAccounts);
 }
 
 //===Создаем блок с графиком===
-function createChartDynamics(newArr, months, dynamics) {
+function createChartDynamics(newArr, months, dynamics, wid) {
+  let f = format('.4s');
   const titleChart = el('h4', 'Динамика баланса');
   const chartBlock = el('.chart-block');
   const chartWithLabels = el('.chartWithLabels');
   const canvas = el(
-    'canvas#myChart',
-    { width: 510, height: 165 },
+    'canvas',
+    { width: wid, height: 165 },
     'Браузер не поддерживает Canvas'
   );
   const xAxis = el('.xAxis', {}, [
     el('p.max', `${f(Math.max.apply(null, newArr))}`),
-    el('p', `${f(Math.min.apply(null, newArr))}`),
+    el('p.subMax'),
+    el('p.min', `${f(Math.min.apply(null, newArr))}`),
   ]);
   const yAxis = el('.yAxis');
   setChildren(
@@ -258,7 +233,7 @@ function createTableOfHistory(data, historyOfTransactions) {
 }
 
 //===Создаем форму транзакций===
-function createForm(form) {
+async function createForm(form) {
   setChildren(form, [
     el('fieldset.form__fieldset', { class: '' }, [
       el('legend.form__legend', { class: '' }, 'Новый перевод'),
@@ -296,7 +271,11 @@ function createForm(form) {
   return form;
 }
 
-export async function checkAccount(data, newArr, months) {
+export async function checkAccount(data, n, m) {
+  let dataForChart = await getBalance(data, n, m);
+  let { returnList, sendMoney, showDynamics } = await import(
+    './js/handlers.js'
+  );
   const title = document.querySelector('.main__title');
   const block = document.querySelector('.main__block');
   const btnTitle = document.querySelector('.main__btn_title');
@@ -320,20 +299,28 @@ export async function checkAccount(data, newArr, months) {
 
   title.textContent = 'Просмотр счета';
   btnTitle.textContent = 'Вернуться назад';
+  btnTitle.classList.remove('js-new');
+  btnTitle.classList.add('return');
+  returnList();
   setAttr(plus, { class: 'arrow' });
   setStyle(mainWrap, { 'margin-bottom': '19px' });
   active.classList.remove('active');
   select.remove();
 
-  createChartDynamics(newArr, months, dynamics);
+  createChartDynamics(dataForChart.newArr, dataForChart.months, dynamics, 510);
   createForm(form);
   createTableOfHistory(data, historyOfTransactions);
 
   setChildren(blockOfData, [form, dynamics, historyOfTransactions]);
   setChildren(block, [wrap, blockOfData]);
-  createChart(newArr);
-  showTransactions(data);
 
+  let canvas = document.querySelector('.main__dynamics canvas');
+
+  createChart(dataForChart.newArr, canvas);
+  showTransactions(data);
+  validate();
+  sendMoney();
+  showDynamics();
   let observer = new IntersectionObserver(showRow, options);
   let visual = document.querySelectorAll('.js-visual');
   let target = visual[visual.length - 1];
@@ -341,21 +328,25 @@ export async function checkAccount(data, newArr, months) {
   observer.observe(target);
 }
 
-export async function getBalance(data) {
+export async function getBalance(data, n, m) {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
-  const firstMonth = currentDate.setMonth(currentMonth - 5);
-  const init = new Date(firstMonth).getMonth() + 1;
+  const firstMonth = currentDate.setMonth(currentMonth - n);
   const arr = [];
   const base = data.payload.transactions;
   let currentBalance = data.payload.balance;
   let newArr = [currentBalance];
   let months = [];
-  for (let i = 0; i < 6; i++) {
+  let objRec = [];
+  let objExp = [];
+  let dates = [];
+  getDates(dates, m);
+  //console.log(dates);
+  for (let i = 0; i < dates.length; i++) {
     let receipts = base
       .filter(
         (obj) =>
-          init + i == new Date(obj.date).getMonth() + 1 &&
+          dates[i] == new Date(obj.date).getMonth() + 1 &&
           new Date(obj.date).getTime() > firstMonth
       )
       .filter((acc) => acc.to == data.payload.account)
@@ -365,7 +356,7 @@ export async function getBalance(data) {
     let expenses = base
       .filter(
         (obj) =>
-          init + i == new Date(obj.date).getMonth() + 1 &&
+          dates[i] == new Date(obj.date).getMonth() + 1 &&
           new Date(obj.date).getTime() > firstMonth
       )
       .filter((acc) => acc.from == data.payload.account)
@@ -373,7 +364,8 @@ export async function getBalance(data) {
       .reduce((sum, current) => sum + current, 0);
 
     let result = receipts - expenses;
-
+    objRec.push(+receipts.toFixed(2));
+    objExp.push(+expenses.toFixed(2));
     arr.push(+result.toFixed(2));
   }
   arr.reverse();
@@ -383,16 +375,21 @@ export async function getBalance(data) {
     newArr.push(+currentBalance.toFixed(2));
   }
   newArr.reverse();
-  console.log(newArr);
-  getMonths(currentDate, currentMonth, months);
-  checkAccount(data, newArr, months);
+  getMonths(currentDate, currentMonth, months, n);
+
+  return {
+    newArr,
+    months,
+    objRec,
+    objExp,
+  };
 }
 
-function getMonths(currentDate, currentMonth, months) {
+function getMonths(currentDate, currentMonth, months, n) {
   let options = {
     month: 'long',
   };
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < n + 1; i++) {
     let month = currentDate.setMonth(currentMonth - i);
     let name = new Date(month).toLocaleString('ru', options).substr(0, 3);
     months.unshift(name);
@@ -445,13 +442,71 @@ function showRow(entries, observer) {
         hidden[j].classList.add('js-visual');
       }
     }
-
     observer.unobserve(entry.target);
     observer.observe(hidden[hidden.length - 1]);
   });
 }
 
-// let observer = new IntersectionObserver(showRow, options);
-// let visual = document.querySelectorAll('.js-visual');
-// let target = visual[visual.length - 1];
-//observer.observe(target);
+export async function transfer() {
+  const pageParams = new URLSearchParams(window.location.search);
+  let inputs = document.querySelectorAll('.form__input');
+  let accFrom = pageParams.get('id');
+  let accTo = document.getElementById('accNum').value;
+  let amount = document.getElementById('amountTrans').value;
+  let btnSend = document.querySelector('.send');
+  let { transferFunds } = await import('./js/api.js');
+  transferFunds(accFrom, accTo, amount);
+  inputs.forEach((input) => {
+    input.value = '';
+    input.classList.remove('success--border');
+  });
+  btnSend.setAttribute('disabled');
+}
+
+export async function showHistoryOfBalance(data) {
+  let { getDatas } = await import('./js/api.js');
+  let { createChart } = await import('./js/charts.js');
+  const blockOfAccounts = document.querySelector('.main__block-data');
+  const dynamics = document.querySelector('.main__dynamics');
+  let canvas = document.querySelector('canvas');
+  const formTrans = document.querySelector('.form_trans');
+  const title = document.querySelector('.main__title');
+  blockOfAccounts.classList.add('main__block-data--new');
+  dynamics.style.width = '100%';
+  dynamics.style.padding = '25px 98px';
+  title.textContent = 'История баланса';
+  formTrans.remove();
+  canvas.remove();
+  data = await getDatas();
+  let dataForChart = await getBalance(data, 11, 12);
+  createChartDynamics(dataForChart.newArr, dataForChart.months, dynamics, 1000);
+  canvas = document.querySelector('.main__dynamics canvas');
+  createChart(dataForChart.newArr, canvas);
+}
+
+export async function showRatio(data) {
+  let { getDatas } = await import('./js/api.js');
+  let { createStackedChart } = await import('./js/charts.js');
+  let blockOfAccounts = document.querySelector('.main__block-data--new');
+  let chart = document.querySelector('.main__dynamics');
+  let table = document.querySelector('.main__history');
+  let dynamics = el('section.main__ratio');
+  dynamics.style.padding = '25px 98px';
+  setChildren(blockOfAccounts, [chart, dynamics, table]);
+
+  data = await getDatas();
+  let dataForChart = await getBalance(data, 11, 12);
+  createChartDynamics(dataForChart.objRec, dataForChart.months, dynamics, 1000);
+  const title = document.querySelector('.main__ratio h4');
+  title.textContent = 'Соотношение входящих исходящих транзакций';
+  let canvas = document.querySelector('.main__ratio canvas');
+  createStackedChart(dataForChart.objRec, dataForChart.objExp, canvas);
+}
+
+function getDates(dates, m) {
+  let date = new Date();
+  for (let j = 0; j < m; j++) {
+    date.setMonth(date.getMonth() - 1);
+    dates.unshift(date.getMonth() + 2);
+  }
+}
