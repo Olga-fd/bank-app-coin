@@ -1,9 +1,8 @@
-import { createListOfCards, createCardOfAccount } from '../index.js';
-//import { el } from 'redom';
 export let tokenId;
 //'Authorization': 'Basic ZGV2ZWxvcGVyOnNraWxsYm94'
 
 export async function authorize(myLogin, myPassword) {
+  let { createHeader, createListOfAccounts } = await import('../index.js');
   try {
     let response = await fetch('http://127.0.0.1:3000/login', {
       method: 'POST',
@@ -23,8 +22,8 @@ export async function authorize(myLogin, myPassword) {
     });
     let data = await response.json();
     tokenId = data.payload.token;
-    createListOfCards();
-    getDataWithAccounts();
+    createHeader();
+    createListOfAccounts();
   } catch (err) {
     alert(err.message);
   }
@@ -43,10 +42,10 @@ export async function createAccount() {
     }),
   });
   let data = await response.json();
-  getDataWithAccounts(data);
+  return data;
 }
 
-export async function getDataWithAccounts() {
+export async function getInfoAboutAccounts() {
   let response = await fetch('http://127.0.0.1:3000/accounts', {
     method: 'GET',
     headers: new Headers({
@@ -59,12 +58,11 @@ export async function getDataWithAccounts() {
     }),
   });
   let data = await response.json();
-  createCardOfAccount(data);
+  return data;
 }
 
 export async function getDataOfAccount() {
   const pageParams = new URLSearchParams(window.location.search);
-  //const account = document.querySelector('.main__account').innerText;
   let response = await fetch(
     `http://127.0.0.1:3000/account/${pageParams.get('id')}`,
     {
@@ -80,8 +78,7 @@ export async function getDataOfAccount() {
     }
   );
   let data = await response.json();
-  let { checkAccount } = await import('../index.js');
-  checkAccount(data, 5, 6);
+  return data;
 }
 
 export async function transferFunds(accFrom, accTo, amount) {
@@ -104,28 +101,70 @@ export async function transferFunds(accFrom, accTo, amount) {
       }),
     });
     let data = await response.json();
-    console.log(data);
+    return data;
   } catch (err) {
     alert(err.message);
   }
 }
 
-export async function getDatas() {
-  const pageParams = new URLSearchParams(window.location.search);
-  let response = await fetch(
-    `http://127.0.0.1:3000/account/${pageParams.get('id')}`,
-    {
-      method: 'GET',
-      headers: new Headers({
-        //eslint-disable-next-line prettier/prettier
+export async function getDataOfPrivateCurrencyAccounts() {
+  let response = await fetch('http://127.0.0.1:3000/currencies', {
+    method: 'GET',
+    headers: new Headers({
+      //eslint-disable-next-line prettier/prettier
       'Accept': 'application/json',
-        //eslint-disable-next-line prettier/prettier
+      //eslint-disable-next-line prettier/prettier
       'Content-Type': 'application/json',
-        //eslint-disable-next-line prettier/prettier
+      //eslint-disable-next-line prettier/prettier
       'Authorization': `Basic ${tokenId}`,
-      }),
-    }
-  );
+    }),
+  });
   let data = await response.json();
   return data;
 }
+
+export async function getExchangeRates() {
+  let response = await fetch('http://127.0.0.1:3000/all-currencies', {
+    method: 'GET',
+    headers: new Headers({
+      //eslint-disable-next-line prettier/prettier
+      'Accept': 'application/json',
+      //eslint-disable-next-line prettier/prettier
+      'Content-Type': 'application/json',
+      //eslint-disable-next-line prettier/prettier
+      'Authorization': `Basic ${tokenId}`,
+    }),
+  });
+  let data = await response.json();
+  return data;
+}
+
+// function connectSocket(param, subject, method) {
+//   let socket = new WebSocket('ws://127.0.0.1:3000/currency-feed');
+//   socket.onopen = function (e) {
+//     alert('[open] Соединение установлено');
+//     alert('Отправляем данные на сервер');
+//     socket.send('Меня зовут Джон');
+//   };
+
+//   socket.onmessage = function (event) {
+//     console.log(event.data);
+//     alert(`[message] Данные получены с сервера: ${event.data}`);
+//   };
+
+//   socket.onclose = function (event) {
+//     if (event.wasClean) {
+//       alert(
+//         `[close] Соединение закрыто чисто, код=${event.code} причина=${event.reason}`
+//       );
+//     } else {
+//       // например, сервер убил процесс или сеть недоступна
+//       // обычно в этом случае event.code 1006
+//       alert('[close] Соединение прервано');
+//     }
+//   };
+
+//   socket.onerror = function (error) {
+//     alert(`[error] ${error.message}`);
+//   };
+// }

@@ -1,6 +1,6 @@
-export function createSelect() {
+export function createSelect(block) {
   /* Look for any elements with the class "custom-select": */
-  const block = document.getElementsByClassName('custom-select');
+  //const block = document.getElementsByClassName('custom-select');
   for (let i = 0; i < block.length; i++) {
     const selElmnt = block[i].getElementsByTagName('select')[0];
 
@@ -18,7 +18,7 @@ export function createSelect() {
     create a new DIV that will act as an option item: */
       const optionName = document.createElement('div');
       optionName.innerHTML = selElmnt.options[j].innerHTML;
-      optionName.addEventListener('click', function (e) {
+      optionName.addEventListener('click', function () {
         /* When an item is clicked, update the original select box,
         and the selected item: */
         const select =

@@ -6,8 +6,9 @@ import { createSelect } from './js/select.js';
 import { createChart } from './js/charts';
 import { format } from 'd3-format';
 import { validate } from './js/handlers.js';
+//import WebSocket from 'ws';
+
 //?episode_id=${object.results[num].episode_id}
-//const pageParams = new URLSearchParams(window.location.search);
 
 async function createLoginScreen() {
   history.pushState(null, '', '../index.html');
@@ -67,12 +68,49 @@ async function createLoginScreen() {
 
 createLoginScreen();
 
-export async function createListOfCards() {
+export async function createHeader() {
   history.pushState(null, '', '../index.html/accounts');
+  let { setActiveStay, showCurrencyExchange, showAccounts } = await import(
+    './js/handlers.js'
+  );
   const form = document.querySelector('form');
   const menu = document.querySelector('nav');
-  const template = el('template#template');
+  //const template = el('template#template');
   const list = el('ul.header__list');
+
+  form.remove();
+  setChildren(menu, list);
+  setChildren(list, { class: '' }, [
+    el('li.header__item', { class: 'list-reset' }, [
+      el('a.header__link', { href: '?ATM' }, 'Банкоматы'),
+    ]),
+    el('li.header__item', { class: 'list-reset' }, [
+      el(
+        'a.header__link',
+        {
+          href: 'http://localhost:8080/index.html/accounts',
+          class: 'accounts active',
+        },
+        'Счета'
+      ),
+    ]),
+    el('li.header__item', { class: 'list-reset' }, [
+      el('a.header__link', { class: 'currency', href: '?currency' }, 'Валюта'),
+    ]),
+    el('li.header__item', { class: 'list-reset' }, [
+      el('a.header__link', { href: '?logout' }, 'Выйти'),
+    ]),
+  ]);
+  createPanel();
+  setActiveStay();
+  showAccounts();
+  showCurrencyExchange();
+  // createSkeleton(template, mainBlock, mainWrap, blockOfAccounts);
+  // showTemplate();
+}
+
+export async function createPanel() {
+  let { createNewAccount } = await import('./js/handlers.js');
   const mainBlock = document.querySelector('.main .container');
   const mainWrap = el('.main__wrap');
   const title = el('h2.main__title', 'Ваши счета');
@@ -85,28 +123,8 @@ export async function createListOfCards() {
     ]),
   ]);
   const blockOfAccounts = el('.main__block', { class: 'grid' });
-  let { createNewAccount } = await import('./js/handlers.js');
-  form.remove();
-  setChildren(menu, list);
-  setChildren(list, { class: '' }, [
-    el('li.header__item', { class: 'list-reset' }, [
-      el('a.header__link', { href: '?ATM' }, 'Банкоматы'),
-    ]),
-    el('li.header__item', { class: 'list-reset' }, [
-      el(
-        'a.header__link',
-        { href: 'http://localhost:8080/index.html/accounts', class: 'active' },
-        'Счета'
-      ),
-    ]),
-    el('li.header__item', { class: 'list-reset' }, [
-      el('a.header__link', { href: '?currency' }, 'Валюта'),
-    ]),
-    el('li.header__item', { class: 'list-reset' }, [
-      el('a.header__link', { href: '?logout' }, 'Выйти'),
-    ]),
-  ]);
-  setChildren(mainBlock, [mainWrap, blockOfAccounts, template]);
+
+  setChildren(mainBlock, [mainWrap, blockOfAccounts]);
   setChildren(mainWrap, [title, customSelect, btnCreate]);
   setChildren(customSelect, selectSort);
   setChildren(selectSort, [
@@ -115,14 +133,15 @@ export async function createListOfCards() {
     el('option', 'По балансу'),
     el('option', 'По последней транзакции'),
   ]);
-  createSelect();
+  let block = document.getElementsByClassName('custom-select');
+  createSelect(block);
   createNewAccount();
-  // createSkeleton(template, mainBlock, mainWrap, blockOfAccounts);
-  // showTemplate();
 }
 
-export async function createCardOfAccount(data) {
+export async function createListOfAccounts() {
   let { openAccount } = await import('./js/handlers.js');
+  let { getInfoAboutAccounts } = await import('./js/api.js');
+  let data = await getInfoAboutAccounts();
   const blockOfAccounts = document.querySelector('.main__block');
   const cards = [];
 
@@ -271,7 +290,9 @@ async function createForm(form) {
   return form;
 }
 
-export async function checkAccount(data, n, m) {
+export async function checkAccount(n, m) {
+  let { getDataOfAccount } = await import('./js/api.js');
+  let data = await getDataOfAccount();
   let dataForChart = await getBalance(data, n, m);
   let { returnList, sendMoney, showDynamics } = await import(
     './js/handlers.js'
@@ -279,6 +300,7 @@ export async function checkAccount(data, n, m) {
   const title = document.querySelector('.main__title');
   const block = document.querySelector('.main__block');
   const btnTitle = document.querySelector('.main__btn_title');
+  const btn = document.querySelector('.main__btn');
   const active = document.querySelector('.active');
   const select = document.querySelector('.custom-select');
   const mainWrap = document.querySelector('.main__wrap');
@@ -299,8 +321,8 @@ export async function checkAccount(data, n, m) {
 
   title.textContent = 'Просмотр счета';
   btnTitle.textContent = 'Вернуться назад';
-  btnTitle.classList.remove('js-new');
-  btnTitle.classList.add('return');
+  btn.classList.remove('js-new');
+  btn.classList.add('return');
   returnList();
   setAttr(plus, { class: 'arrow' });
   setStyle(mainWrap, { 'margin-bottom': '19px' });
@@ -463,8 +485,9 @@ export async function transfer() {
   btnSend.setAttribute('disabled');
 }
 
-export async function showHistoryOfBalance(data) {
-  let { getDatas } = await import('./js/api.js');
+export async function showHistoryOfBalance() {
+  let { getDataOfAccount } = await import('./js/api.js');
+  let data = await getDataOfAccount();
   let { createChart } = await import('./js/charts.js');
   const blockOfAccounts = document.querySelector('.main__block-data');
   const dynamics = document.querySelector('.main__dynamics');
@@ -477,16 +500,18 @@ export async function showHistoryOfBalance(data) {
   title.textContent = 'История баланса';
   formTrans.remove();
   canvas.remove();
-  data = await getDatas();
+
   let dataForChart = await getBalance(data, 11, 12);
   createChartDynamics(dataForChart.newArr, dataForChart.months, dynamics, 1000);
   canvas = document.querySelector('.main__dynamics canvas');
   createChart(dataForChart.newArr, canvas);
 }
 
-export async function showRatio(data) {
-  let { getDatas } = await import('./js/api.js');
+export async function showRatio() {
+  let { getDataOfAccount } = await import('./js/api.js');
   let { createStackedChart } = await import('./js/charts.js');
+  let data = await getDataOfAccount();
+  let dataForChart = await getBalance(data, 11, 12);
   let blockOfAccounts = document.querySelector('.main__block-data--new');
   let chart = document.querySelector('.main__dynamics');
   let table = document.querySelector('.main__history');
@@ -494,8 +519,6 @@ export async function showRatio(data) {
   dynamics.style.padding = '25px 98px';
   setChildren(blockOfAccounts, [chart, dynamics, table]);
 
-  data = await getDatas();
-  let dataForChart = await getBalance(data, 11, 12);
   createChartDynamics(dataForChart.objRec, dataForChart.months, dynamics, 1000);
   const title = document.querySelector('.main__ratio h4');
   title.textContent = 'Соотношение входящих исходящих транзакций';
@@ -509,4 +532,167 @@ function getDates(dates, m) {
     date.setMonth(date.getMonth() - 1);
     dates.unshift(date.getMonth() + 2);
   }
+}
+
+window.addEventListener('popstate', async function () {
+  // console.log("location: " + location.href + ", state: " + JSON.stringify(event.state));
+  //history.pushState({page: 1}, "title 1", `${window.location.search}`);
+  //let { checkAccount } = await import('../index.js');
+  const pageParams = new URLSearchParams(window.location.search);
+  if (pageParams.get('accounts')) {
+    document.querySelector('body').innerHTML = '';
+    createListOfAccounts();
+  } else if (pageParams.get('id')) {
+    document.querySelector('main container').innerHTML = '';
+    checkAccount();
+  }
+});
+
+export async function getCurrencyExchange() {
+  let { stopScroll, allowScroll } = await import('./js/scroll.js');
+  let { getExchangeRates, getDataOfPrivateCurrencyAccounts } = await import(
+    './js/api.js'
+  );
+  let data1 = await getDataOfPrivateCurrencyAccounts();
+  let data2 = await getExchangeRates();
+  const exchangeRate = el('section.main__section-rate');
+  const container = document.querySelector('main .container');
+  const title = el('h2.main__title', 'Валютный обмен');
+  setStyle(title, { 'margin-bottom': '56px' });
+  const block = el('.main__block', {
+    class: 'main__block-data main__block-data--currency',
+  });
+  const form = el('form.main__form-currency', { class: '' });
+
+  const rows = [];
+  for (let value of Object.values(data1.payload)) {
+    let row = el('li', [
+      el('span.code', value.code),
+      el('span.dash'),
+      el('span.amount-currency', `${value.amount.toLocaleString('ru')}`),
+    ]);
+    rows.push(row);
+  }
+  const currencies = el('section.main__section-private', [
+    el('h4.main__section_title', 'Ваши валюты'),
+    el('.wrap_ul', [el('ul.main__section_ul', { class: 'list-reset' }, rows)]),
+  ]);
+
+  createBlockOfExchangeRates(exchangeRate);
+  createFormForCurrencyExchange(form, data2);
+
+  setChildren(block, [currencies, exchangeRate, form]);
+  setChildren(container, [title, block]);
+
+  let list = document.querySelector('.js-change');
+  connectSocket(list);
+  let customSelect1 = document.getElementsByClassName('first');
+  let customSelect2 = document.getElementsByClassName('second');
+  createSelect(customSelect1);
+  createSelect(customSelect2);
+
+  stopScroll();
+  allowScroll();
+}
+
+export function createBlockOfExchangeRates(exchangeRate) {
+  setChildren(exchangeRate, [
+    el('h4.main__section_title', 'Изменение курсов в реальном времени'),
+    el('.wrap_ul', [
+      el('ul.main__section_ul', { class: 'list-reset js-change' }),
+    ]),
+  ]);
+}
+
+export function createFormForCurrencyExchange(form, data2) {
+  let codes1 = [];
+  for (let value of data2.payload) {
+    let code = el('option.option', value);
+    codes1.push(code);
+  }
+  let codes2 = [];
+  for (let value of data2.payload) {
+    let code = el('option.option', value);
+    codes2.push(code);
+  }
+
+  const fieldset = el('fieldset.form__fieldset', { class: '' });
+  const legend = el('legend.form__legend', { class: '' }, 'Обмен валюты');
+  const container = el('.form__grid-container', { class: '' });
+  const labelBox1 = el('.form__label-box');
+  const label1 = el('label.form__label', { for: 'select1' }, 'Из');
+  let customSelect1 = el('.custom-select', { class: 'first', id: 'select1' });
+  const select1 = el('select.main__select', codes1);
+  const label2 = el('label.form__label', { for: 'select2' }, 'в');
+  let customSelect2 = el('.custom-select', { class: 'second', id: 'select2' });
+  const select2 = el('select.main__select', codes2);
+  const labelBox2 = el('.form__label-box', [
+    el('label.form__label', { for: '' }, 'Сумма'),
+    el('input.form__input', {
+      class: '',
+      type: 'text',
+      id: '',
+      placeholder: 'Placeholder',
+    }),
+    el('span', {
+      class: 'error success',
+      type: 'text',
+    }),
+  ]);
+  const btn = el(
+    'button.btn',
+    { class: 'send', type: 'submit', disabled: 'disabled' },
+    'Обменять'
+  );
+
+  setChildren(form, fieldset);
+  setChildren(fieldset, [legend, container]);
+  setChildren(container, [labelBox1, labelBox2, btn]);
+  setChildren(labelBox1, [label1, customSelect1, label2, customSelect2]);
+  setChildren(customSelect1, select1);
+  setChildren(customSelect2, select2);
+  return form;
+}
+
+function connectSocket(list) {
+  let socket = new WebSocket('ws://localhost:3000/currency-feed');
+  // Соединение открыто
+  socket.addEventListener('open', function (event) {
+    //alert('Подключено');
+    socket.send('Are there changes?');
+  });
+  //Message from server  {"type":"EXCHANGE_RATE_CHANGE",
+  //"from":"BTC",
+  //"to":"CAD","rate":36.73,
+  //"change":-1}
+
+  // Наблюдает за сообщениями{class: }
+  socket.addEventListener('message', function (event) {
+    console.log('Message from server ', event.data);
+
+    let rates = JSON.parse(event.data);
+    // eslint-disable-next-line prettier/prettier
+    console.log(rates);
+    if (rates.type == 'EXCHANGE_RATE_CHANGE') {
+      let row = el('li', [
+        el('span.code', `${rates.from}/${rates.to}`),
+        el('span.dash', { class: 'js-dash' }),
+        el('span.amount-currency', rates.rate),
+        el('span.js-amount'),
+      ]);
+      list.prepend(row);
+    } else {
+      return;
+    }
+
+    let amount = document.querySelector('.js-amount');
+    let dash = document.querySelector('.js-dash');
+    if (rates.change == 1) {
+      setAttr(amount, { class: 'arrow-up' });
+      setStyle(dash, { 'border-color': '#76ca66' });
+    } else if (rates.change == -1) {
+      setAttr(amount, { class: 'arrow-down' });
+      setStyle(dash, { 'border-color': '#fd4e5d' });
+    }
+  });
 }

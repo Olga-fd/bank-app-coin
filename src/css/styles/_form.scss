@@ -73,13 +73,12 @@
     }
 
     & .form__label {
-    font-family: $ubuntu;
-    font-size: 14.9px;
-    font-weight: 600;
-    padding-right: 18px;
-
+      font-family: $ubuntu;
+      font-size: 14.9px;
+      font-weight: 600;
+      padding-right: 18px;
+    }
   }
-}
 }
 
 fieldset {
@@ -94,8 +93,43 @@ fieldset {
   margin-bottom: 30px;
 }
 
-
 #accNum,
 #amountTrans {
   display: inline-block;
+}
+
+.form__grid-container {
+  display: grid;
+  grid-template-columns: 358px 104px;
+  grid-template-rows: 44px 44px;
+  grid-template-areas: 'label1  btn'
+                       'label2 btn';
+  grid-auto-flow: row;
+  gap: 25px;
+
+  & .form__label-box:first-child {
+    grid-area: label1;
+  }
+
+  & .form__label-box:nth-child(2) {
+    grid-area: label2;
+
+    & .form__label {
+      padding-right: 5px;
+    }
+  }
+
+  & .btn {
+    display: inline-block;
+    width: 104px;
+    height: 113px;
+    margin-left: 0;
+    padding: 47px 13px;
+    grid-area: btn;
+  }
+
+  & .custom-select {
+    width: 134px;
+  }
+
 }
