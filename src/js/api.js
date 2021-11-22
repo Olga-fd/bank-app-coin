@@ -168,3 +168,30 @@ export async function getExchangeRates() {
 //     alert(`[error] ${error.message}`);
 //   };
 // }
+
+export async function buyCurrency(currencyFrom, currencyTo, amountToTransfer) {
+  try {
+    let response = await fetch('http://127.0.0.1:3000/currency-buy', {
+      method: 'POST',
+      body: JSON.stringify({
+        from: `${currencyFrom}`, // счёт с которого списываются средства
+        to: `${currencyTo}`, // счёт, на который зачисляются средства
+        amount: `${amountToTransfer}`, // сумма для перевода
+      }),
+
+      headers: new Headers({
+        //eslint-disable-next-line prettier/prettier
+      'Accept': 'application/json',
+        //eslint-disable-next-line prettier/prettier
+      'Content-Type': 'application/json',
+        //eslint-disable-next-line prettier/prettier
+      'Authorization': `Basic ${tokenId}`,
+      }),
+    });
+    let data = await response.json();
+    console.log(data);
+    return data;
+  } catch (err) {
+    alert(err.message);
+  }
+}

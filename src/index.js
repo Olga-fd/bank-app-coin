@@ -70,6 +70,7 @@ createLoginScreen();
 
 export async function createHeader() {
   history.pushState(null, '', '../index.html/accounts');
+  let { showATM } = await import('./js/handlers.js');
   let { setActiveStay, showCurrencyExchange, showAccounts } = await import(
     './js/handlers.js'
   );
@@ -82,7 +83,7 @@ export async function createHeader() {
   setChildren(menu, list);
   setChildren(list, { class: '' }, [
     el('li.header__item', { class: 'list-reset' }, [
-      el('a.header__link', { href: '?ATM' }, 'Банкоматы'),
+      el('a.header__link', { class: 'atm', href: '?ATM' }, 'Банкоматы'),
     ]),
     el('li.header__item', { class: 'list-reset' }, [
       el(
@@ -103,6 +104,7 @@ export async function createHeader() {
   ]);
   createPanel();
   setActiveStay();
+  showATM();
   showAccounts();
   showCurrencyExchange();
   // createSkeleton(template, mainBlock, mainWrap, blockOfAccounts);
@@ -548,8 +550,21 @@ window.addEventListener('popstate', async function () {
   }
 });
 
+export function createRows(data, rows) {
+  for (let value of Object.values(data.payload)) {
+    let row = el('li', [
+      el('span.code', value.code),
+      el('span.dash'),
+      el('span.amount-currency', `${value.amount.toLocaleString('ru')}`),
+    ]);
+    rows.push(row);
+  }
+  console.log(rows);
+}
+
 export async function getCurrencyExchange() {
   let { stopScroll, allowScroll } = await import('./js/scroll.js');
+  let { validateSum, exchangeCurrency } = await import('./js/handlers.js');
   let { getExchangeRates, getDataOfPrivateCurrencyAccounts } = await import(
     './js/api.js'
   );
@@ -563,16 +578,9 @@ export async function getCurrencyExchange() {
     class: 'main__block-data main__block-data--currency',
   });
   const form = el('form.main__form-currency', { class: '' });
-
   const rows = [];
-  for (let value of Object.values(data1.payload)) {
-    let row = el('li', [
-      el('span.code', value.code),
-      el('span.dash'),
-      el('span.amount-currency', `${value.amount.toLocaleString('ru')}`),
-    ]);
-    rows.push(row);
-  }
+  createRows(data1, rows);
+
   const currencies = el('section.main__section-private', [
     el('h4.main__section_title', 'Ваши валюты'),
     el('.wrap_ul', [el('ul.main__section_ul', { class: 'list-reset' }, rows)]),
@@ -584,12 +592,17 @@ export async function getCurrencyExchange() {
   setChildren(block, [currencies, exchangeRate, form]);
   setChildren(container, [title, block]);
 
+  let arr = [];
   let list = document.querySelector('.js-change');
-  connectSocket(list);
   let customSelect1 = document.getElementsByClassName('first');
   let customSelect2 = document.getElementsByClassName('second');
+  //createRowsWithRates(sessionStorage.getItem('changes'), list);
+  connectSocket(list, arr);
   createSelect(customSelect1);
   createSelect(customSelect2);
+
+  validateSum();
+  exchangeCurrency();
 
   stopScroll();
   allowScroll();
@@ -629,9 +642,7 @@ export function createFormForCurrencyExchange(form, data2) {
   const labelBox2 = el('.form__label-box', [
     el('label.form__label', { for: '' }, 'Сумма'),
     el('input.form__input', {
-      class: '',
       type: 'text',
-      id: '',
       placeholder: 'Placeholder',
     }),
     el('span', {
@@ -654,45 +665,43 @@ export function createFormForCurrencyExchange(form, data2) {
   return form;
 }
 
-function connectSocket(list) {
+function connectSocket(list, arr) {
   let socket = new WebSocket('ws://localhost:3000/currency-feed');
+
   // Соединение открыто
   socket.addEventListener('open', function (event) {
-    //alert('Подключено');
     socket.send('Are there changes?');
   });
-  //Message from server  {"type":"EXCHANGE_RATE_CHANGE",
-  //"from":"BTC",
-  //"to":"CAD","rate":36.73,
-  //"change":-1}
 
-  // Наблюдает за сообщениями{class: }
-  socket.addEventListener('message', function (event) {
-    console.log('Message from server ', event.data);
-
-    let rates = JSON.parse(event.data);
-    // eslint-disable-next-line prettier/prettier
-    console.log(rates);
-    if (rates.type == 'EXCHANGE_RATE_CHANGE') {
-      let row = el('li', [
-        el('span.code', `${rates.from}/${rates.to}`),
-        el('span.dash', { class: 'js-dash' }),
-        el('span.amount-currency', rates.rate),
-        el('span.js-amount'),
-      ]);
-      list.prepend(row);
-    } else {
-      return;
-    }
-
-    let amount = document.querySelector('.js-amount');
-    let dash = document.querySelector('.js-dash');
-    if (rates.change == 1) {
-      setAttr(amount, { class: 'arrow-up' });
-      setStyle(dash, { 'border-color': '#76ca66' });
-    } else if (rates.change == -1) {
-      setAttr(amount, { class: 'arrow-down' });
-      setStyle(dash, { 'border-color': '#fd4e5d' });
-    }
+  // Наблюдает за сообщениями
+  socket.addEventListener('message', async function (event) {
+    arr.push(event.data);
+    sessionStorage.setItem('changes', arr);
+    createRowsWithRates(event.data, list);
   });
+}
+
+function createRowsWithRates(data, list) {
+  let rates = JSON.parse(data);
+  if (rates.type == 'EXCHANGE_RATE_CHANGE') {
+    let row = el('li', [
+      el('span.code', `${rates.from}/${rates.to}`),
+      el('span.dash', { class: 'js-dash' }),
+      el('span.amount-currency', rates.rate),
+      el('span.js-amount'),
+    ]);
+    list.prepend(row);
+  } else {
+    return;
+  }
+
+  let amount = document.querySelector('.js-amount');
+  let dash = document.querySelector('.js-dash');
+  if (rates.change == 1) {
+    setAttr(amount, { class: 'arrow-up' });
+    setStyle(dash, { 'border-color': '#76ca66' });
+  } else if (rates.change == -1) {
+    setAttr(amount, { class: 'arrow-down' });
+    setStyle(dash, { 'border-color': '#fd4e5d' });
+  }
 }

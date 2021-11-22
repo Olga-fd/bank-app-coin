@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import validator from 'validator';
 import { el, setChildren } from 'redom';
 
@@ -121,6 +122,30 @@ export function validate() {
   });
 }
 
+//;
+
+export function validateSum() {
+  const formInput = document.querySelector('.form__input');
+  const btn = document.querySelector('[type="submit"]');
+  formInput.addEventListener('blur', () => {
+    if (parseInt(formInput.value.trim()) > 0 && typeof parseInt(formInput.value.trim()) == 'number'
+    ) {
+      formInput.classList.remove('error--border');
+      formInput.classList.add('success--border');
+
+      btn.removeAttribute('disabled', 'disabled');
+    } else {
+      formInput.classList.remove('success--border');
+      formInput.classList.add('error--border');
+      return;
+    }
+  });
+  // formInput.addEventListener('focus', () => {
+  //   let elem = document.activeElement;
+  //   if (elem !== btn) cleanError(elem);
+  // }, true);
+}
+
 export async function sendMoney() {
   let { transfer } = await import('../index.js');
   const formTrans = document.querySelector('.form_trans');
@@ -179,3 +204,57 @@ export function setActiveStay() {
     })
   );
 }
+
+export async function exchangeCurrency() {
+  let { buyCurrency } = await import('./api.js');
+  let {createRows} = await import('../index.js');
+  const list = document.querySelector('.main__section_ul');
+  const formExchange = document.querySelector('.main__form-currency');
+  const input = document.querySelector('.form__input');
+  const btn = document.querySelector('.btn');
+  const rows = [];
+
+  formExchange.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    let currencyFrom = document.querySelector('.first .select-selected').innerHTML;
+    let currencyTo = document.querySelector('.second .select-selected').innerHTML;
+    let amountToTransfer = input.value.trim();
+    amountToTransfer = parseInt(amountToTransfer);
+
+    let data = await buyCurrency(currencyFrom, currencyTo, amountToTransfer);
+    input.value = '';
+    input.classList.remove('success--border');
+    btn.setAttribute('disabled', 'disabled');
+    list.innerHTML = '';
+
+    createRows(data, rows);
+    setChildren(list, rows);
+  });
+}
+
+export function showATM() {
+  const atm = document.querySelector('.atm');
+  const main = document.querySelector('main .container');
+
+  atm.addEventListener('click', async (e) => {
+    e.preventDefault();
+    //let {init} = await import('./map.js');
+    main.innerHTML = '';
+    setChildren(main, [
+      el('h2.main__title', 'Банкоматы'),
+      el('#map')
+    ])
+
+    let myMap;
+    function init() {
+        myMap = new ymaps.Map("map", {
+            center: [55.87, 37.66],
+            zoom: 10
+        });
+
+    }
+  })
+}
+
+
