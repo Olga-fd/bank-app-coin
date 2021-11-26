@@ -3,10 +3,8 @@ import './css/style.scss';
 //import { showTemplate, createSkeleton } from './js/skeleton.js';
 //const checkWithMoonAlg = require('./moon.js');
 import { createSelect } from './js/select.js';
-import { createChart } from './js/charts';
 import { format } from 'd3-format';
-import { validate } from './js/handlers.js';
-//import WebSocket from 'ws';
+import { returnFromHistory } from './js/handlers.js';
 
 //?episode_id=${object.results[num].episode_id}
 
@@ -70,7 +68,7 @@ createLoginScreen();
 
 export async function createHeader() {
   history.pushState(null, '', '../index.html/accounts');
-  let { showATM } = await import('./js/handlers.js');
+  //let { showATM } = await import('./js/handlers.js');
   let { setActiveStay, showCurrencyExchange, showAccounts } = await import(
     './js/handlers.js'
   );
@@ -104,7 +102,7 @@ export async function createHeader() {
   ]);
   createPanel();
   setActiveStay();
-  showATM();
+  //showATM();
   showAccounts();
   showCurrencyExchange();
   // createSkeleton(template, mainBlock, mainWrap, blockOfAccounts);
@@ -112,13 +110,13 @@ export async function createHeader() {
 }
 
 export async function createPanel() {
-  let { createNewAccount } = await import('./js/handlers.js');
+  let { createNewAccount, sortByKey } = await import('./js/handlers.js');
   const mainBlock = document.querySelector('.main .container');
   const mainWrap = el('.main__wrap');
   const title = el('h2.main__title', 'Ваши счета');
   const customSelect = el('.custom-select');
   const selectSort = el('select.main__select');
-  const btnCreate = el('button.btn', { class: 'main__btn js-new' }, [
+  const btnCreate = el('button.btn', { class: 'main__btn' }, [
     el('p', [
       el('span.plus'),
       el('span.main__btn_title', 'Создать новый счёт'),
@@ -137,7 +135,30 @@ export async function createPanel() {
   ]);
   let block = document.getElementsByClassName('custom-select');
   createSelect(block);
+  sortByKey();
   createNewAccount();
+}
+
+export async function modifyPanel() {
+  let { returnList } = await import('./js/handlers.js');
+  const title = document.querySelector('.main__title');
+  const select = document.querySelector('.custom-select');
+  const mainWrap = document.querySelector('.main__wrap');
+  const btnCreate = document.querySelector('.main__btn');
+  const btn = el('button.btn', { class: 'main__btn' }, [
+    el('p', [el('span.arrow'), el('span.main__btn_title', 'Вернуться назад')]),
+  ]);
+
+  title.textContent = 'Просмотр счета';
+
+  if (select) {
+    select.remove();
+    btnCreate.remove();
+  }
+
+  setStyle(mainWrap, { 'margin-bottom': '19px' });
+  mainWrap.append(btn);
+  returnList();
 }
 
 export async function createListOfAccounts() {
@@ -145,7 +166,16 @@ export async function createListOfAccounts() {
   let { getInfoAboutAccounts } = await import('./js/api.js');
   let data = await getInfoAboutAccounts();
   const blockOfAccounts = document.querySelector('.main__block');
+  const selected = document.querySelector('.select-selected');
   const cards = [];
+
+  if (selected.innerHTML == 'По номеру') {
+    byKey(data, 'account');
+  } else if (selected.innerHTML == 'По балансу') {
+    byKey(data, 'balance');
+  } else if (selected.innerHTML == 'По последней транзакции') {
+    byKey(data, 'transactions.date');
+  }
 
   for (let i = 0; i < data.payload.length; i++) {
     let cardBlock = el('.main__card_block');
@@ -253,7 +283,7 @@ function createTableOfHistory(data, historyOfTransactions) {
   return historyOfTransactions;
 }
 
-//===Создаем форму транзакций===
+//===Создаем форму транзакций==={ width: 300 },
 async function createForm(form) {
   setChildren(form, [
     el('fieldset.form__fieldset', { class: '' }, [
@@ -261,12 +291,18 @@ async function createForm(form) {
       el('.form__container', { class: '' }, [
         el('.form__label-box', [
           el('label.form__label', { for: 'accNum' }, 'Номер счёта получателя'),
-          el('input.form__input', {
-            class: '',
-            type: 'text',
-            id: 'accNum',
-            placeholder: 'Placeholder',
-          }),
+
+          el('.autocomplete', [
+            el('input.form__input', {
+              class: '',
+              type: 'text',
+              id: 'accNum',
+              list: 'list',
+              placeholder: 'Placeholder',
+            }),
+          ]),
+
+          //el('datalist#list'),
         ]),
         el('.form__label-box', [
           el('label.form__label', { for: 'amountTrans' }, 'Сумма перевода'),
@@ -292,59 +328,78 @@ async function createForm(form) {
   return form;
 }
 
+function writeInputValues(arr) {
+  let input = document.getElementById('accNum');
+
+  input.addEventListener('change', () => {
+    let record = input.value;
+    if (record.length > 16) {
+      arr.push(record);
+      localStorage.setItem('records', JSON.stringify(arr));
+    }
+    if (arr.length > 10) {
+      arr = [];
+    }
+  });
+}
+
 export async function checkAccount(n, m) {
+  let { autocomplete } = await import('./js/autocomplete.js');
   let { getDataOfAccount } = await import('./js/api.js');
   let data = await getDataOfAccount();
   let dataForChart = await getBalance(data, n, m);
-  let { returnList, sendMoney, showDynamics } = await import(
+  let { sendMoney, showDynamics, validateFormTrans } = await import(
     './js/handlers.js'
   );
-  const title = document.querySelector('.main__title');
+  let { createChart } = await import('./js/charts.js');
+
   const block = document.querySelector('.main__block');
-  const btnTitle = document.querySelector('.main__btn_title');
-  const btn = document.querySelector('.main__btn');
   const active = document.querySelector('.active');
-  const select = document.querySelector('.custom-select');
-  const mainWrap = document.querySelector('.main__wrap');
-  const plus = document.querySelector('.plus');
   const blockOfData = el('.main__block-data');
-  const form = el('form.form_trans', { class: 'options' });
+
+  const form = el('form.form_trans', { class: 'options', autocomplete: 'off' });
   const dynamics = el('section.main__dynamics');
   const historyOfTransactions = el('.main__history', { class: 'options' });
-  const wrap = el('.wrap', [
-    el('p.main__account', `№ ${data.payload.account}`),
-    el('p.main__balance', 'Баланс', [
-      el(
-        'span.main__balance_amount',
-        `${data.payload.balance.toLocaleString('ru')} ₽`
-      ),
-    ]),
-  ]);
-
-  title.textContent = 'Просмотр счета';
-  btnTitle.textContent = 'Вернуться назад';
-  btn.classList.remove('js-new');
-  btn.classList.add('return');
-  returnList();
-  setAttr(plus, { class: 'arrow' });
-  setStyle(mainWrap, { 'margin-bottom': '19px' });
-  active.classList.remove('active');
-  select.remove();
 
   createChartDynamics(dataForChart.newArr, dataForChart.months, dynamics, 510);
   createForm(form);
   createTableOfHistory(data, historyOfTransactions);
 
   setChildren(blockOfData, [form, dynamics, historyOfTransactions]);
-  setChildren(block, [wrap, blockOfData]);
 
+  if (active) {
+    active.classList.remove('active');
+    const wrap = el('.wrap', [
+      el('p.main__account', `№ ${data.payload.account}`),
+      el('p.main__balance', 'Баланс', [
+        el(
+          'span.main__balance_amount',
+          `${data.payload.balance.toLocaleString('ru')} ₽`
+        ),
+      ]),
+    ]);
+    setChildren(block, [wrap, blockOfData]);
+  } else {
+    block.append(blockOfData);
+  }
+
+  let arrGlobal = [];
+  let storage = localStorage.getItem('records');
+  if (storage) {
+    writeInputValues(JSON.parse(storage));
+  } else {
+    writeInputValues(arrGlobal);
+  }
+  let records = JSON.parse(localStorage.getItem('records'));
+  autocomplete(document.getElementById('accNum'), records);
   let canvas = document.querySelector('.main__dynamics canvas');
 
   createChart(dataForChart.newArr, canvas);
   showTransactions(data);
-  validate();
+  validateFormTrans();
   sendMoney();
   showDynamics();
+
   let observer = new IntersectionObserver(showRow, options);
   let visual = document.querySelectorAll('.js-visual');
   let target = visual[visual.length - 1];
@@ -491,22 +546,33 @@ export async function showHistoryOfBalance() {
   let { getDataOfAccount } = await import('./js/api.js');
   let data = await getDataOfAccount();
   let { createChart } = await import('./js/charts.js');
+  let canvas = document.querySelector('canvas');
+  let btnNew = el('button.btn', { class: 'main__btn' }, [
+    el('p', [el('span.arrow'), el('span.main__btn_title', 'Вернуться назад')]),
+  ]);
   const blockOfAccounts = document.querySelector('.main__block-data');
   const dynamics = document.querySelector('.main__dynamics');
-  let canvas = document.querySelector('canvas');
   const formTrans = document.querySelector('.form_trans');
   const title = document.querySelector('.main__title');
+  const btn = document.querySelector('.main__btn');
+  const wrap = document.querySelector('.main__wrap');
+
   blockOfAccounts.classList.add('main__block-data--new');
   dynamics.style.width = '100%';
   dynamics.style.padding = '25px 98px';
   title.textContent = 'История баланса';
   formTrans.remove();
   canvas.remove();
+  btn.remove();
+
+  wrap.append(btnNew);
 
   let dataForChart = await getBalance(data, 11, 12);
   createChartDynamics(dataForChart.newArr, dataForChart.months, dynamics, 1000);
   canvas = document.querySelector('.main__dynamics canvas');
   createChart(dataForChart.newArr, canvas);
+
+  returnFromHistory();
 }
 
 export async function showRatio() {
@@ -552,19 +618,23 @@ window.addEventListener('popstate', async function () {
 
 export function createRows(data, rows) {
   for (let value of Object.values(data.payload)) {
-    let row = el('li', [
-      el('span.code', value.code),
-      el('span.dash'),
-      el('span.amount-currency', `${value.amount.toLocaleString('ru')}`),
-    ]);
-    rows.push(row);
+    if (value.amount !== 0) {
+      let row = el('li', [
+        el('span.code', value.code),
+        el('span.dash'),
+        el('span.amount-currency', `${value.amount.toLocaleString('ru')}`),
+      ]);
+      rows.push(row);
+    }
   }
   console.log(rows);
 }
 
 export async function getCurrencyExchange() {
   let { stopScroll, allowScroll } = await import('./js/scroll.js');
-  let { validateSum, exchangeCurrency } = await import('./js/handlers.js');
+  let { validateFormTrans, exchangeCurrency } = await import(
+    './js/handlers.js'
+  );
   let { getExchangeRates, getDataOfPrivateCurrencyAccounts } = await import(
     './js/api.js'
   );
@@ -592,16 +662,17 @@ export async function getCurrencyExchange() {
   setChildren(block, [currencies, exchangeRate, form]);
   setChildren(container, [title, block]);
 
-  let arr = [];
+  //let arr = [];
   let list = document.querySelector('.js-change');
   let customSelect1 = document.getElementsByClassName('first');
   let customSelect2 = document.getElementsByClassName('second');
-  //createRowsWithRates(sessionStorage.getItem('changes'), list);
-  connectSocket(list, arr);
+  let dataChange = sessionStorage.getItem('changes');
   createSelect(customSelect1);
   createSelect(customSelect2);
+  createRowsWithRates(dataChange, list);
+  connectSocket(list);
 
-  validateSum();
+  validateFormTrans();
   exchangeCurrency();
 
   stopScroll();
@@ -665,20 +736,29 @@ export function createFormForCurrencyExchange(form, data2) {
   return form;
 }
 
-function connectSocket(list, arr) {
+function connectSocket(list) {
   let socket = new WebSocket('ws://localhost:3000/currency-feed');
-
   // Соединение открыто
-  socket.addEventListener('open', function (event) {
+  socket.addEventListener('open', function () {
     socket.send('Are there changes?');
   });
 
   // Наблюдает за сообщениями
   socket.addEventListener('message', async function (event) {
-    arr.push(event.data);
-    sessionStorage.setItem('changes', arr);
+    //arr.push(event.data);
+    sessionStorage.setItem('changes', event.data);
     createRowsWithRates(event.data, list);
   });
+
+  // setTimeout(() =>
+  //   socket.addEventListener(
+  //     'close',
+  //     (event) => {
+  //       event.code === 1000, event.reason === 'работа закончена';
+  //     },
+  //     6500
+  //   )
+  // );
 }
 
 function createRowsWithRates(data, list) {
@@ -705,3 +785,25 @@ function createRowsWithRates(data, list) {
     setStyle(dash, { 'border-color': '#fd4e5d' });
   }
 }
+
+export function byKey(data, key) {
+  data.payload.sort((a, b) => {
+    if (a[key] > b[key]) {
+      return 1;
+    }
+    if (a[key] < b[key]) {
+      return -1;
+    }
+    return 0;
+  });
+}
+
+// if (window.matchMedia("(min-width: 320px) and (max-width: 594px)").matches) {
+//   input.setAttribute('placeholder', 'Введите данные');
+// } else {
+//   input.setAttribute('placeholder', 'Введите данные контакта');
+// };
+
+// if (document.documentElement.clientWidth > 768) {
+
+// }

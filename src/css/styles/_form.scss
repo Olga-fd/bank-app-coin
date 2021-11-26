@@ -98,6 +98,10 @@ fieldset {
   display: inline-block;
 }
 
+#accNum {
+  position: relative;
+}
+
 .form__grid-container {
   display: grid;
   grid-template-columns: 358px 104px;
@@ -130,6 +134,56 @@ fieldset {
 
   & .custom-select {
     width: 134px;
+  }
+
+}
+
+
+@media (min-width: 320px) and (max-width: 767px) {
+
+  .form {
+
+    &_trans {
+      width: 100vw;
+      height: 200px;
+outline: 1px dashed blue;
+
+      & fieldset {
+        padding: 5px;
+      }
+
+      & legend {
+        padding-top: 10px;
+        font-size: 1rem;
+        line-height: 2;
+      }
+
+      & .btn {
+        margin-left: 0;
+      }
+      & .form__container {
+        align-items: center;
+        justify-content: center;
+
+      }
+
+      & .form__label-box {
+        // display: flex;
+        // justify-content: center;
+        // flex-flow: column;
+        padding-bottom: 10px;
+      }
+
+      & .form__label {
+
+        font-size: 0.7em;
+      }
+
+    }
+
+
+
+
   }
 
 }

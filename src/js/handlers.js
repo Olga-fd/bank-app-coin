@@ -1,18 +1,30 @@
 /* eslint-disable prettier/prettier */
 import validator from 'validator';
 import { el, setChildren } from 'redom';
+import { createListOfAccounts } from '../index.js';
+// import { init } from './map.js';
+// import { getMap } from './api.js';
 
 function delAttr() {
   const submit = document.querySelector('[type="submit"]');
-  if (document.getElementsByClassName('success--border').length === 2) {
-    submit.removeAttribute('disabled', 'disabled');
-  }
+  const successBorder = document.getElementsByClassName('success--border');
+
+  if (submit.innerText === 'Войти' || submit.innerText === 'Отправить') {
+    if (successBorder.length === 2) {
+      submit.removeAttribute('disabled', 'disabled');
+    }
+  } else if(submit.innerText === 'Обменять') {
+    if (successBorder.length === 1) {
+      submit.removeAttribute('disabled', 'disabled');
+    }
+  } else {return}
 }
 
 export async function createNewAccount() {
   let { createAccount } = await import('./api.js');
-  let { createListOfAccounts } = await import('../index.js');
-  document.querySelector('.js-new').addEventListener('click', () => {
+  //let { createListOfAccounts } = await import('../index.js');
+  const btn = document.querySelector('.main__btn');
+  btn.addEventListener('click', () => {
     const blockOfAccounts = document.querySelector('.main__block');
     blockOfAccounts.innerHTML = '';
     createAccount();
@@ -22,49 +34,42 @@ export async function createNewAccount() {
 
 export async function showAccounts() {
   let accounts = document.querySelector('.accounts');
-  let { createPanel, createListOfAccounts } = await import('../index.js');
+  let { createPanel } = await import('../index.js');
   accounts.addEventListener('click', (e) => {
     e.preventDefault();
-    document.querySelector('.main').innerHtml = '';
+    document.querySelector('main .container').innerHTML = '';
     createPanel();
     createListOfAccounts();
   });
 }
 
 export async function returnList() {
-  let btn = document.querySelector('.return');
-  let { createListOfAccounts } = await import('../index.js');
+  let { createPanel } = await import('../index.js');
+  let btn = document.querySelector('.main__btn');
+
   btn.addEventListener('click', async () => {
     document.querySelector('main .container').innerHTML = '';
     history.pushState(null, '', './accounts');
-
-    const mainBlock = document.querySelector('.main .container');
-    const mainWrap = el('.main__wrap');
-    const title = el('h2.main__title', 'Ваши счета');
-    const customSelect = el('.custom-select');
-    const selectSort = el('select.main__select');
-    const btnCreate = el('button.btn', { class: 'main__btn js-new' }, [
-      el('p', [
-        el('span.plus'),
-        el('span.main__btn_title', 'Создать новый счёт'),
-      ]),
-    ]);
-    const blockOfAccounts = el('.main__block', { class: 'grid' });
-    let { createSelect } = await import('./select.js');
-    setChildren(mainBlock, [mainWrap, blockOfAccounts]);
-    setChildren(mainWrap, [title, customSelect, btnCreate]);
-    setChildren(customSelect, selectSort);
-    setChildren(selectSort, [
-      el('option', 'Сортировка'),
-      el('option', 'По номеру'),
-      el('option', 'По балансу'),
-      el('option', 'По последней транзакции'),
-    ]);
-    createSelect();
+    document.querySelector('.accounts').classList.add('active');;
+    createPanel();
     createListOfAccounts();
   });
 }
 
+export async function returnFromHistory() {
+  let { modifyPanel, checkAccount } = await import('../index.js');
+  let btn = document.querySelector('.main__btn');
+  const mainBlock = document.querySelector('.main__block-data');
+
+  btn.addEventListener('click', async () => {
+    btn.remove();
+    mainBlock.remove();
+
+    history.pushState(null, '', window.location.search.replace('&history=true',''));
+    modifyPanel();
+    checkAccount(5, 6);
+  });
+}
 // export function changeURL() {
 //   window.addEventListener('popstate', async function () {
 //     // console.log("location: " + location.href + ", state: " + JSON.stringify(event.state));
@@ -83,12 +88,14 @@ export async function returnList() {
 // }
 
 export async function openAccount(blockOfAccounts) {
-  let { checkAccount } = await import('../index.js');
+  let { modifyPanel, checkAccount } = await import('../index.js');
   document.querySelectorAll('.main__btn-open').forEach((open) =>
     open.addEventListener('click', (e) => {
       e.preventDefault();
       history.pushState(null, '', open.href);
       blockOfAccounts.classList.remove('grid');
+      blockOfAccounts.innerHTML = '';
+      modifyPanel();
       checkAccount(5, 6);
     })
   );
@@ -122,29 +129,58 @@ export function validate() {
   });
 }
 
-//;
+export function validateFormTrans() {
+  const formInputs = document.querySelectorAll('.form__input');
+  //const accNum = document.getElementById('accNum').value.length;|| accNum < 16
+  formInputs.forEach((input) => {
+    input.addEventListener('blur', () => {
+      const lengthInput = validator.isLength(input.value);
+      const space = validator.contains(input.value, ' ');
+      const isNumeric = validator.isNumeric(input.value);
 
-export function validateSum() {
-  const formInput = document.querySelector('.form__input');
-  const btn = document.querySelector('[type="submit"]');
-  formInput.addEventListener('blur', () => {
-    if (parseInt(formInput.value.trim()) > 0 && typeof parseInt(formInput.value.trim()) == 'number'
-    ) {
-      formInput.classList.remove('error--border');
-      formInput.classList.add('success--border');
+      if (lengthInput == false || space == true || isNumeric == false || input.value <= 0 ) {
+        input.classList.add('error--border');
+      // console.log(lengthInput == false);
+      // console.log(space == true);
+      // console.log(isNumeric == false);
+      // console.log(input.value <= 0);
+      } else {
+        input.classList.add('success--border');
+      }
+      delAttr();
+    });
 
-      btn.removeAttribute('disabled', 'disabled');
-    } else {
-      formInput.classList.remove('success--border');
-      formInput.classList.add('error--border');
-      return;
-    }
-  });
+    input.addEventListener('focus', () => {
+      const submit = document.querySelector('[type="submit"]');
+      input.value = '';
+      input.classList.remove('error--border');
+      input.classList.remove('success--border');
+      submit.setAttribute('disabled', 'disabled');
+    });
+  })
+}
+
+// export function validateSum() {
+//   const formInput = document.querySelector('.form__input');
+//   const btn = document.querySelector('[type="submit"]');
+//   formInput.addEventListener('blur', () => {
+//     if (parseInt(formInput.value.trim()) > 0 && typeof parseInt(formInput.value.trim()) == 'number'
+//     ) {
+//       formInput.classList.remove('error--border');
+//       formInput.classList.add('success--border');
+
+//       btn.removeAttribute('disabled', 'disabled');
+//     } else {
+//       formInput.classList.remove('success--border');
+//       formInput.classList.add('error--border');
+//       return;
+//     }
+//   });
   // formInput.addEventListener('focus', () => {
   //   let elem = document.activeElement;
   //   if (elem !== btn) cleanError(elem);
   // }, true);
-}
+//}
 
 export async function sendMoney() {
   let { transfer } = await import('../index.js');
@@ -159,6 +195,7 @@ export async function showDynamics() {
   const dynamics = document.querySelector('.main__dynamics');
   let { showHistoryOfBalance, showRatio } = await import('../index.js');
   dynamics.addEventListener('click', () => {
+    history.pushState(null, '', `${window.location.search}&history=true`);
     showHistoryOfBalance();
     showRatio();
   });
@@ -233,28 +270,45 @@ export async function exchangeCurrency() {
   });
 }
 
-export function showATM() {
-  const atm = document.querySelector('.atm');
-  const main = document.querySelector('main .container');
+// export async function showATM() {
+//   const atm = document.querySelector('.atm');
+//   const main = document.querySelector('main .container');
+//   //const body = document.querySelector('body');
+// let {getCoordinates} = await import('./api.js');
+//   atm.addEventListener('click', async (e) => {
+//     e.preventDefault();
+//     //let {init} = await import('./map.js');
+//     main.innerHTML = '';
+//     setChildren(main, [
+//       el('h2.main__title', 'Банкоматы'),
+//       el('#map'),
+//     ]);
+//     getCoordinates();
+//     //let script1 = el('script', {type: "text/javascript"}, `
+//       //let myMap;
+//       //function init() {
+//         //let myMap;
+//        // init(ymaps);
+//       //}
+//     //`);
+//     // let script2 = el('script', {
+//     //   src: 'https://api-maps.yandex.ru/2.1/?apikey=0c61dc80-6967-49f4-b0be-8b4ff68d5dda&lang=ru_RU',
+//     //   type: 'text/javascript'
+//     // })
 
-  atm.addEventListener('click', async (e) => {
-    e.preventDefault();
-    //let {init} = await import('./map.js');
+//     //body.append(script1);
+
+//   })
+// }
+
+
+export function sortByKey() {
+  const main = document.querySelector('.main__block');
+  const options = document.querySelectorAll('.select-items div');
+
+  options.forEach(option => option.addEventListener('click', () => {
     main.innerHTML = '';
-    setChildren(main, [
-      el('h2.main__title', 'Банкоматы'),
-      el('#map')
-    ])
-
-    let myMap;
-    function init() {
-        myMap = new ymaps.Map("map", {
-            center: [55.87, 37.66],
-            zoom: 10
-        });
-
-    }
+    createListOfAccounts();
   })
+  )
 }
-
-

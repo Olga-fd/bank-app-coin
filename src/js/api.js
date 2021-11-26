@@ -195,3 +195,24 @@ export async function buyCurrency(currencyFrom, currencyTo, amountToTransfer) {
     alert(err.message);
   }
 }
+
+export async function getCoordinates() {
+  try {
+    let response = await fetch('http://127.0.0.1:3000/banks', {
+      method: 'GET',
+      headers: new Headers({
+        //eslint-disable-next-line prettier/prettier
+      'Accept': 'application/json',
+        //eslint-disable-next-line prettier/prettier
+      'Content-Type': 'application/json',
+        //eslint-disable-next-line prettier/prettier
+      'Authorization': `Basic ${tokenId}`,
+      }),
+    });
+    let data = await response.json();
+    console.log(data);
+    return data;
+  } catch (err) {
+    alert(err.message);
+  }
+}

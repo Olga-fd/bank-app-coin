@@ -555,10 +555,6 @@ button:disabled {
   }
 }
 
-.amount-currency {
-
-}
-
 .code {
   font-weight: 600;
 }
@@ -745,3 +741,145 @@ thead {
   height: 728px;
 }
 
+
+
+
+
+
+
+.autocomplete {
+  /*the container must be positioned relative:*/
+  position: relative;
+  display: inline-block;
+  width: 300px;
+}
+
+.autocomplete-items {
+  position: absolute;
+  max-height: 178px;
+  background-color: $white;
+  border-radius: 7px;
+  box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.25);
+  z-index: 99;
+  /*position the autocomplete items to be the same width as the container:*/
+  top: 100%;
+  left: 0;
+  right: 0;
+
+  & input {
+    border: 1px solid transparent;
+    background-color: #f1f1f1;
+    padding: 10px;
+    font-size: 16px;
+  }
+  & input[type=text] {
+    background-color: #f1f1f1;
+    width: 100%;
+  }
+
+}
+.autocomplete-items div {
+  padding: 11px 16px;
+  cursor: pointer;
+}
+.autocomplete-items div:hover {
+  background-color: $info-color;
+}
+.autocomplete-active {
+  /*when navigating through the items using the arrow keys:*/
+  background: url('../assets/images/check.svg') no-repeat;
+  color: #ffffff;
+}
+
+
+
+@media (min-width: 320px) and (max-width: 767px) {
+  h1 {
+    padding: 6px 0;
+    font-size: 2rem;
+    line-height: 36px;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+  .container {
+    width: 95%;
+  }
+
+  .options {
+    border-radius: 0;
+    background-color: transparent;
+  }
+
+  .autocomplete {
+    width: 240px;
+  }
+
+  .header {
+    height: 50px;
+    margin-bottom: 15px;
+
+    &__link {
+      display: none;
+    }
+  }
+
+  .arrow, .plus {
+    margin-right: 0;
+  }
+
+  .send {
+    padding: 10px;
+    font-size: .8em;
+  }
+
+  .mail {
+    display: none;
+
+  }
+
+  input {
+    display: inline-block;
+    width: 240px;
+    height: 30px;
+    margin: 0 auto;
+  }
+
+  .wrap {
+    display: flex;
+    flex-flow: column;
+    margin-bottom: 10px;
+  }
+  .main {
+
+    &__account {
+      font-weight: 500;
+    }
+    &__btn {
+      padding: 5px;
+      font-size: 0.5em;
+
+      &_title {
+        display: none;
+      }
+    }
+
+    &__block-data {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+      grid-template-areas: "form"
+                          "chart"
+                          "history ";
+    }
+  }
+
+
+}
+
+@media (min-width: 320px) and (max-width: 992px) {
+  .wrap * {
+    font-size: .8rem;
+  }
+
+}
