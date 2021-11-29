@@ -1,8 +1,13 @@
+import { showErrorForCurrency } from './errors.js';
+
 export let tokenId;
+//import ErrorComponent from './errors.js';
+
 //'Authorization': 'Basic ZGV2ZWxvcGVyOnNraWxsYm94'
 
 export async function authorize(myLogin, myPassword) {
   let { createHeader, createListOfAccounts } = await import('../index.js');
+  let data;
   try {
     let response = await fetch('http://127.0.0.1:3000/login', {
       method: 'POST',
@@ -20,12 +25,14 @@ export async function authorize(myLogin, myPassword) {
         'Content-Type': 'application/json',
       }),
     });
-    let data = await response.json();
+    data = await response.json();
+    console.log(data);
     tokenId = data.payload.token;
     createHeader();
     createListOfAccounts();
   } catch (err) {
-    alert(err.message);
+    let { showErrorForAuthorization } = await import('./errors.js');
+    showErrorForAuthorization(data.error);
   }
 }
 
@@ -82,28 +89,32 @@ export async function getDataOfAccount() {
 }
 
 export async function transferFunds(accFrom, accTo, amount) {
-  try {
-    let response = await fetch('http://127.0.0.1:3000/transfer-funds', {
-      method: 'POST',
-      body: JSON.stringify({
-        from: `${accFrom}`, // счёт с которого списываются средства
-        to: `${accTo}`, // счёт, на который зачисляются средства
-        amount: `${amount}`, // сумма для перевода
-      }),
+  let response = await fetch('http://127.0.0.1:3000/transfer-funds', {
+    method: 'POST',
+    body: JSON.stringify({
+      from: `${accFrom}`, // счёт с которого списываются средства
+      to: `${accTo}`, // счёт, на который зачисляются средства
+      amount: `${amount}`, // сумма для перевода
+    }),
 
-      headers: new Headers({
-        //eslint-disable-next-line prettier/prettier
+    headers: new Headers({
+      //eslint-disable-next-line prettier/prettier
         'Accept': 'application/json',
-        //eslint-disable-next-line prettier/prettier
+      //eslint-disable-next-line prettier/prettier
         'Content-Type': 'application/json',
-        //eslint-disable-next-line prettier/prettier
+      //eslint-disable-next-line prettier/prettier
         'Authorization': `Basic ${tokenId}`,
-      }),
-    });
-    let data = await response.json();
+    }),
+  });
+  let data = await response.json();
+
+  if (data.payload !== null) {
+    console.log(data.payload !== null);
     return data;
-  } catch (err) {
-    alert(err.message);
+  } else {
+    let { showErrorForTransfer } = await import('./errors.js');
+    console.log(data);
+    showErrorForTransfer(data.error);
   }
 }
 
@@ -170,29 +181,31 @@ export async function getExchangeRates() {
 // }
 
 export async function buyCurrency(currencyFrom, currencyTo, amountToTransfer) {
-  try {
-    let response = await fetch('http://127.0.0.1:3000/currency-buy', {
-      method: 'POST',
-      body: JSON.stringify({
-        from: `${currencyFrom}`, // счёт с которого списываются средства
-        to: `${currencyTo}`, // счёт, на который зачисляются средства
-        amount: `${amountToTransfer}`, // сумма для перевода
-      }),
+  let response = await fetch('http://127.0.0.1:3000/currency-buy', {
+    method: 'POST',
+    body: JSON.stringify({
+      from: `${currencyFrom}`, // счёт с которого списываются средства
+      to: `${currencyTo}`, // счёт, на который зачисляются средства
+      amount: `${amountToTransfer}`, // сумма для перевода
+    }),
 
-      headers: new Headers({
-        //eslint-disable-next-line prettier/prettier
+    headers: new Headers({
+      //eslint-disable-next-line prettier/prettier
       'Accept': 'application/json',
-        //eslint-disable-next-line prettier/prettier
+      //eslint-disable-next-line prettier/prettier
       'Content-Type': 'application/json',
-        //eslint-disable-next-line prettier/prettier
+      //eslint-disable-next-line prettier/prettier
       'Authorization': `Basic ${tokenId}`,
-      }),
-    });
-    let data = await response.json();
-    console.log(data);
+    }),
+  });
+  let data = await response.json();
+  if (data.payload !== null) {
+    console.log(data.payload !== null);
     return data;
-  } catch (err) {
-    alert(err.message);
+  } else {
+    let { showErrorForCurrency } = await import('./errors.js');
+    console.log(data);
+    showErrorForCurrency(data.error);
   }
 }
 

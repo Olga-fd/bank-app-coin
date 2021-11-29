@@ -12,6 +12,7 @@
   "author": "Olga",
   "devDependencies": {
     "@babel/core": "^7.15.8",
+    "@babel/plugin-proposal-class-properties": "^7.16.0",
     "@babel/plugin-transform-runtime": "^7.15.8",
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.15.8",
@@ -47,6 +48,6 @@
   "dependencies": {
     "chart.js": "^3.6.0",
     "redom": "^3.27.1",
-    "validator": "^13.6.0"
+    "validator": "^13.7.0"
   }
 }

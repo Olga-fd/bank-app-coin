@@ -5,7 +5,6 @@ import './css/style.scss';
 import { createSelect } from './js/select.js';
 import { format } from 'd3-format';
 import { returnFromHistory } from './js/handlers.js';
-
 //?episode_id=${object.results[num].episode_id}
 
 async function createLoginScreen() {
@@ -37,6 +36,12 @@ async function createLoginScreen() {
             value: 'developer',
             placeholder: 'Placeholder',
           }),
+          el('span', {
+            class: 'js-icon',
+          }),
+          el('span', {
+            class: 'js-notification',
+          }),
         ]),
         el('.form__label-box', [
           el('label.form__label', { for: 'password' }, 'Пароль'),
@@ -48,8 +53,10 @@ async function createLoginScreen() {
             placeholder: 'Placeholder',
           }),
           el('span', {
-            class: 'error success',
-            type: 'text',
+            class: 'js-icon',
+          }),
+          el('span', {
+            class: 'js-notification',
           }),
         ]),
       ]),
@@ -301,8 +308,12 @@ async function createForm(form) {
               placeholder: 'Placeholder',
             }),
           ]),
-
-          //el('datalist#list'),
+          el('span', {
+            class: 'js-icon',
+          }),
+          el('span', {
+            class: 'js-notification',
+          }),
         ]),
         el('.form__label-box', [
           el('label.form__label', { for: 'amountTrans' }, 'Сумма перевода'),
@@ -313,8 +324,10 @@ async function createForm(form) {
             placeholder: 'Placeholder',
           }),
           el('span', {
-            class: 'error success',
-            type: 'text',
+            class: 'js-icon',
+          }),
+          el('span', {
+            class: 'js-notification',
           }),
         ]),
       ]),
@@ -539,7 +552,7 @@ export async function transfer() {
     input.value = '';
     input.classList.remove('success--border');
   });
-  btnSend.setAttribute('disabled');
+  btnSend.setAttribute('disabled', 'disabled');
 }
 
 export async function showHistoryOfBalance() {
@@ -669,7 +682,11 @@ export async function getCurrencyExchange() {
   let dataChange = sessionStorage.getItem('changes');
   createSelect(customSelect1);
   createSelect(customSelect2);
-  createRowsWithRates(dataChange, list);
+
+  if (dataChange) {
+    createRowsWithRates(dataChange, list);
+  }
+
   connectSocket(list);
 
   validateFormTrans();
@@ -717,8 +734,10 @@ export function createFormForCurrencyExchange(form, data2) {
       placeholder: 'Placeholder',
     }),
     el('span', {
-      class: 'error success',
-      type: 'text',
+      class: 'js-icon',
+    }),
+    el('span', {
+      class: 'js-notification',
     }),
   ]);
   const btn = el(

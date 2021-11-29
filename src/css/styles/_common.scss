@@ -159,14 +159,6 @@ input:focus::-moz-placeholder          {opacity: 0; transition: opacity 0.3s eas
 input:focus:-moz-placeholder           {opacity: 0; transition: opacity 0.3s ease;}
 input:focus:-ms-input-placeholder      {opacity: 0; transition: opacity 0.3s ease;}
 
-.input--success {
-  background-color: $success-color;
-}
-
-.input--error {
-  background-color: $error-color;
-}
-
 input[type="search"]::-webkit-search-decoration,
 input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-results-button,
@@ -212,32 +204,79 @@ input[type="search"]::-webkit-search-results-decoration {
   user-select: none;           /* Non-prefixed version, currently*/
 }
 
-span.error, span.success {
+.js-notification {
+  position: absolute;
+  bottom: 2px;
+  left: 40px;
   display: none;
   padding: 2px 31px;
   font-weight: 500;
   background-repeat: no-repeat;
 }
 
-span.error {
-  color: $error-color;
+.js-icon {
+  position: absolute;
+  top: 7px;
+  right: -37px;
+  display: none;
+  width: 24px;
+  height: 24px;
+  background-repeat: no-repeat;
+}
+
+.icon-error {
   background-image: url('../assets/images/error.svg');
 }
 
-input.error--border {
-  border-color: $error-color;
-}
-
-span.success {
-  color: $success-color;
+.icon-success {
   background-image: url('../assets/images/circle_check.svg');
 }
 
-input.success--border {
+.--length {
+  bottom: 4px;
+  left: 50px;
+}
+
+.--length1 {
+  width: 384px;
+  left: 171px;
+}
+
+.--length2 {
+  //width: 384px;
+  left: 113px;
+}
+.--length3 {
+  //width: 384px;
+  top: 47px;
+  left: 62px;
+
+}
+
+.--length4 {
+  //width: 384px;
+  top: 45px;
+  left: 58px;
+
+}
+
+.--error {
+  color: $error-color;
+}
+
+.--success {
+  color: $success-color;
+}
+
+.error--border {
+  border-color: $error-color;
+}
+
+.success--border {
   border-color: $success-color;
 }
 
-button:hover {
+button:hover, a:hover {
   background-color: $havelock-blue;
 }
 
@@ -260,8 +299,12 @@ button:disabled {
   border-radius: 7px;
   border: none;
   cursor: pointer;
+
 }
 
+.btn, :hover, .js-icon, .js-notification {
+  transition: .3s ease-in-out;
+}
 .options {
   background-color: $athens-gray;
   border-radius: 50px;
@@ -676,6 +719,7 @@ h4 {
 
 canvas {
   border: 1px solid black;
+  //transform: scale(0.5);
 }
 
 .xAxis {
@@ -694,7 +738,9 @@ canvas {
 }
 
 .yAxis span {
+  //display: inline-block;
   padding-right: 42px;
+  //transform: rotate(-90deg);
 
   &:first-child {
     padding-left: 42px;
