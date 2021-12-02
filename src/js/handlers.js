@@ -2,6 +2,7 @@
 import validator from 'validator';
 import { el, setChildren } from 'redom';
 import { createListOfAccounts } from '../index.js';
+import { showSpecificTemplate } from './skeleton.js';
 // import { init } from './map.js';
 // import { getMap } from './api.js';
 
@@ -63,8 +64,8 @@ export async function returnFromHistory() {
 
   btn.addEventListener('click', async () => {
     btn.remove();
-    mainBlock.remove();
-
+    mainBlock.innerHTML = '';
+    mainBlock.classList.remove('main__block-data--new');
     history.pushState(null, '', window.location.search.replace('&history=true',''));
     modifyPanel();
     checkAccount(5, 6);
@@ -192,22 +193,50 @@ export async function sendMoney() {
 }
 
 export async function showDynamics() {
+  let { changePanel } = await import('../index.js');
   const dynamics = document.querySelector('.main__dynamics');
-  let { showHistoryOfBalance, showRatio } = await import('../index.js');
-  dynamics.addEventListener('click', () => {
+  dynamics.addEventListener('click', async () => {
     history.pushState(null, '', `${window.location.search}&history=true`);
-    showHistoryOfBalance();
-    showRatio();
+    const blockOfAccounts = document.querySelector('.main__block-data');
+    blockOfAccounts.classList.add('main__block-data--new');
+    blockOfAccounts.innerHTML = '';
+    changePanel();
+    setTimeout(() => {
+      createBlocks(blockOfAccounts);
+    }, 100)
   });
+}
+
+async function createBlocks(blockOfAccounts) {
+  let {createTableOfHistory} = await import('../index.js');
+  let { showHistoryOfBalance, showRatio, showTransactions } = await import('../index.js');
+  let { getDataOfAccount } = await import('./api.js');
+  const data = await getDataOfAccount();
+  const chart = el('section.main__dynamics', { class: 'dynamics--annual' });
+  const dynamicsRatio = el('section.main__ratio');
+  const historyOfTransactions = el('.main__history', { class: 'options' });
+
+  setChildren(blockOfAccounts, [chart, dynamicsRatio, historyOfTransactions]);
+  dynamicsRatio.style.padding = '25px 98px';
+
+  showHistoryOfBalance(data, chart);
+  showRatio(data, dynamicsRatio);
+  createTableOfHistory(data, historyOfTransactions);
+  showTransactions(data)
 }
 
 export function showCurrencyExchange() {
   let currency = document.querySelector('.currency');
   currency.addEventListener('click', async (e) => {
     e.preventDefault();
-    document.querySelector('main .container').innerHtml = '';
+    document.querySelector('main .container').innerHTML = '';
+    let { showSpecificTemplate, createCurrencyTemplate } = await import('./skeleton.js');
     let { getCurrencyExchange } = await import('../index.js');
-    getCurrencyExchange();
+    createCurrencyTemplate();
+    showSpecificTemplate('template3', 'main .container');
+    setTimeout(() => {
+      getCurrencyExchange();
+    }, 100);
   });
 }
 
@@ -270,36 +299,47 @@ export async function exchangeCurrency() {
   });
 }
 
-// export async function showATM() {
-//   const atm = document.querySelector('.atm');
-//   const main = document.querySelector('main .container');
-//   //const body = document.querySelector('body');
-// let {getCoordinates} = await import('./api.js');
-//   atm.addEventListener('click', async (e) => {
-//     e.preventDefault();
-//     //let {init} = await import('./map.js');
-//     main.innerHTML = '';
-//     setChildren(main, [
-//       el('h2.main__title', 'Банкоматы'),
-//       el('#map'),
-//     ]);
-//     getCoordinates();
-//     //let script1 = el('script', {type: "text/javascript"}, `
-//       //let myMap;
-//       //function init() {
-//         //let myMap;
-//        // init(ymaps);
-//       //}
-//     //`);
-//     // let script2 = el('script', {
-//     //   src: 'https://api-maps.yandex.ru/2.1/?apikey=0c61dc80-6967-49f4-b0be-8b4ff68d5dda&lang=ru_RU',
-//     //   type: 'text/javascript'
-//     // })
+export async function showATM() {
+  const atm = document.querySelector('.atm');
+  const main = document.querySelector('main .container');
+  //const body = document.querySelector('body');
+  let {createBankTemplate, showSpecificTemplate} = await import('./skeleton.js');
+//let {getCoordinates} = await import('./api.js');
+  atm.addEventListener('click', async (e) => {
+    e.preventDefault();
+    //let {init} = await import('./map.js');
+    main.innerHTML = '';
+    createBankTemplate();
+    showSpecificTemplate('template4', 'main .container')
+    // setChildren(main, [
+    //   el('h2.main__title', 'Банкоматы'),
+    //   el('#map'),
+    // ]);
+    // getCoordinates();
+    //let script1 = el('script', {type: "text/javascript"}, `
+      //let myMap;
+      //function init() {
+        //let myMap;
+       // init(ymaps);
+      //}
+    //`);
+    // let script2 = el('script', {
+    //   src: 'https://api-maps.yandex.ru/2.1/?apikey=0c61dc80-6967-49f4-b0be-8b4ff68d5dda&lang=ru_RU',
+    //   type: 'text/javascript'
+    // })
 
-//     //body.append(script1);
+    //body.append(script1);
 
-//   })
-// }
+  })
+}
+
+export async function logout() {
+  let {createLoginScreen} = await import('../index.js');
+  const btn = document.querySelector('[href="?logout"]');
+  btn.addEventListener('click', () => {
+    createLoginScreen();
+  })
+}
 
 
 export function sortByKey() {

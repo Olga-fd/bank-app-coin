@@ -1,13 +1,13 @@
 import { el, setChildren, setAttr, setStyle } from 'redom';
 import './css/style.scss';
-//import { showTemplate, createSkeleton } from './js/skeleton.js';
 //const checkWithMoonAlg = require('./moon.js');
 import { createSelect } from './js/select.js';
 import { format } from 'd3-format';
+import { showSpecificTemplate } from './js/skeleton.js';
 import { returnFromHistory } from './js/handlers.js';
 //?episode_id=${object.results[num].episode_id}
 
-async function createLoginScreen() {
+export async function createLoginScreen() {
   history.pushState(null, '', '../index.html');
   let { validate, submitForm } = await import('./js/handlers.js');
   const header = el('header.header');
@@ -75,13 +75,10 @@ createLoginScreen();
 
 export async function createHeader() {
   history.pushState(null, '', '../index.html/accounts');
-  //let { showATM } = await import('./js/handlers.js');
-  let { setActiveStay, showCurrencyExchange, showAccounts } = await import(
-    './js/handlers.js'
-  );
+  let { showATM, logout, setActiveStay, showCurrencyExchange, showAccounts } =
+    await import('./js/handlers.js');
   const form = document.querySelector('form');
   const menu = document.querySelector('nav');
-  //const template = el('template#template');
   const list = el('ul.header__list');
 
   form.remove();
@@ -109,15 +106,15 @@ export async function createHeader() {
   ]);
   createPanel();
   setActiveStay();
-  //showATM();
+  showATM();
   showAccounts();
   showCurrencyExchange();
-  // createSkeleton(template, mainBlock, mainWrap, blockOfAccounts);
-  // showTemplate();
+  logout();
 }
 
 export async function createPanel() {
   let { createNewAccount, sortByKey } = await import('./js/handlers.js');
+  let { createTemplate, showTemplate } = await import('./js/skeleton.js');
   const mainBlock = document.querySelector('.main .container');
   const mainWrap = el('.main__wrap');
   const title = el('h2.main__title', 'Ваши счета');
@@ -144,10 +141,15 @@ export async function createPanel() {
   createSelect(block);
   sortByKey();
   createNewAccount();
+  createTemplate(blockOfAccounts);
+  showTemplate();
 }
 
 export async function modifyPanel() {
   let { returnList } = await import('./js/handlers.js');
+  let { createChartTemplate, createChartReturnTemplate } = await import(
+    './js/skeleton.js'
+  );
   const title = document.querySelector('.main__title');
   const select = document.querySelector('.custom-select');
   const mainWrap = document.querySelector('.main__wrap');
@@ -166,6 +168,13 @@ export async function modifyPanel() {
   setStyle(mainWrap, { 'margin-bottom': '19px' });
   mainWrap.append(btn);
   returnList();
+  if (document.querySelector('.main__account')) {
+    createChartReturnTemplate();
+    showSpecificTemplate('template5', '.main__block-data');
+  } else {
+    createChartTemplate();
+    showSpecificTemplate('template1');
+  }
 }
 
 export async function createListOfAccounts() {
@@ -254,7 +263,7 @@ function createChartDynamics(newArr, months, dynamics, wid) {
 }
 
 //===Создаем таблицу с историей транзакций===
-function createTableOfHistory(data, historyOfTransactions) {
+export function createTableOfHistory(data, historyOfTransactions) {
   const transactions = data.payload.transactions.reverse();
   const titleOfTable = el('h4', 'История переводов');
   const table = el('table');
@@ -368,7 +377,13 @@ export async function checkAccount(n, m) {
 
   const block = document.querySelector('.main__block');
   const active = document.querySelector('.active');
-  const blockOfData = el('.main__block-data');
+  let blockOfData;
+  if (document.querySelector('.main__block-data')) {
+    blockOfData = document.querySelector('.main__block-data');
+  } else {
+    blockOfData = el('.main__block-data');
+  }
+  console.log(blockOfData);
 
   const form = el('form.form_trans', { class: 'options', autocomplete: 'off' });
   const dynamics = el('section.main__dynamics');
@@ -392,9 +407,10 @@ export async function checkAccount(n, m) {
       ]),
     ]);
     setChildren(block, [wrap, blockOfData]);
-  } else {
-    block.append(blockOfData);
   }
+  // else {
+  //   block.append(blockOfData);
+  // }
 
   let arrGlobal = [];
   let storage = localStorage.getItem('records');
@@ -433,7 +449,7 @@ export async function getBalance(data, n, m) {
   let objExp = [];
   let dates = [];
   getDates(dates, m);
-  //console.log(dates);
+
   for (let i = 0; i < dates.length; i++) {
     let receipts = base
       .filter(
@@ -489,7 +505,7 @@ function getMonths(currentDate, currentMonth, months, n) {
   return months;
 }
 
-function showTransactions(data) {
+export function showTransactions(data) {
   const accountFrom = document.querySelectorAll('.js-transFrom');
   const amount = document.querySelectorAll('.js-amountTrans');
 
@@ -555,56 +571,53 @@ export async function transfer() {
   btnSend.setAttribute('disabled', 'disabled');
 }
 
-export async function showHistoryOfBalance() {
-  let { getDataOfAccount } = await import('./js/api.js');
-  let data = await getDataOfAccount();
-  let { createChart } = await import('./js/charts.js');
-  let canvas = document.querySelector('canvas');
-  let btnNew = el('button.btn', { class: 'main__btn' }, [
-    el('p', [el('span.arrow'), el('span.main__btn_title', 'Вернуться назад')]),
-  ]);
-  const blockOfAccounts = document.querySelector('.main__block-data');
-  const dynamics = document.querySelector('.main__dynamics');
-  const formTrans = document.querySelector('.form_trans');
+export async function changePanel() {
+  let { createHistoryTemplate } = await import('./js/skeleton.js');
   const title = document.querySelector('.main__title');
   const btn = document.querySelector('.main__btn');
   const wrap = document.querySelector('.main__wrap');
-
-  blockOfAccounts.classList.add('main__block-data--new');
-  dynamics.style.width = '100%';
-  dynamics.style.padding = '25px 98px';
+  const btnNew = el('button.btn', { class: 'main__btn' }, [
+    el('p', [el('span.arrow'), el('span.main__btn_title', 'Вернуться назад')]),
+  ]);
   title.textContent = 'История баланса';
-  formTrans.remove();
-  canvas.remove();
   btn.remove();
-
   wrap.append(btnNew);
-
-  let dataForChart = await getBalance(data, 11, 12);
-  createChartDynamics(dataForChart.newArr, dataForChart.months, dynamics, 1000);
-  canvas = document.querySelector('.main__dynamics canvas');
-  createChart(dataForChart.newArr, canvas);
-
   returnFromHistory();
+
+  createHistoryTemplate();
+  showSpecificTemplate('template2', '.main__block-data--new');
 }
 
-export async function showRatio() {
-  let { getDataOfAccount } = await import('./js/api.js');
-  let { createStackedChart } = await import('./js/charts.js');
-  let data = await getDataOfAccount();
+export async function showHistoryOfBalance(data, dynamics) {
+  // let { getDataOfAccount } = await import('./js/api.js');data = await getDataOfAccount();
+  //const blockOfAccounts = document.querySelector('.main__block-data');
+  //const dynamics = el('.main__dynamics', { class: 'dynamics--annual' });
+  //setChildren(blockOfAccounts, dynamics);
+  // blockOfAccounts.classList.add('main__block-data--new');
+  let { createChart } = await import('./js/charts.js');
   let dataForChart = await getBalance(data, 11, 12);
-  let blockOfAccounts = document.querySelector('.main__block-data--new');
-  let chart = document.querySelector('.main__dynamics');
-  let table = document.querySelector('.main__history');
-  let dynamics = el('section.main__ratio');
-  dynamics.style.padding = '25px 98px';
-  setChildren(blockOfAccounts, [chart, dynamics, table]);
+  createChartDynamics(dataForChart.newArr, dataForChart.months, dynamics, 1000);
+  const canvas = document.querySelector('.main__dynamics canvas');
+  createChart(dataForChart.newArr, canvas);
+}
 
+export async function showRatio(data, dynamics) {
+  //let { getDataOfAccount } = await import('./js/api.js');
+  //let data = await getDataOfAccount();
+  //let blockOfAccounts = document.querySelector('.main__block-data--new');
+  // let chart = document.querySelector('.main__dynamics');
+  // let table = document.querySelector('.main__history');
+  //let dynamics = el('section.main__ratio');
+  //setChildren(blockOfAccounts, [chart, dynamics, table]);
+
+  let { createStackedChart } = await import('./js/charts.js');
+  let dataForChart = await getBalance(data, 11, 12);
   createChartDynamics(dataForChart.objRec, dataForChart.months, dynamics, 1000);
   const title = document.querySelector('.main__ratio h4');
-  title.textContent = 'Соотношение входящих исходящих транзакций';
+  title.textContent = 'Соотношение входящих и исходящих транзакций';
   let canvas = document.querySelector('.main__ratio canvas');
   createStackedChart(dataForChart.objRec, dataForChart.objExp, canvas);
+  //return dynamics;
 }
 
 function getDates(dates, m) {

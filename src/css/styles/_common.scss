@@ -470,6 +470,7 @@ button:disabled {
   &__dynamics {
     width: 684px;
     grid-area: chart;
+    cursor: pointer;
   }
 
   &__dynamics,
@@ -582,7 +583,11 @@ button:disabled {
   &__wrap {
     margin-bottom: 50px;
   }
+}
 
+.dynamics--annual {
+  width: 100%;
+  padding: 25px 98px;
 }
 
 .wrap_ul {
@@ -782,7 +787,8 @@ thead {
   }
 }
 
-#map {
+#map,
+.skeleton-block {
   width: 100%;
   height: 728px;
 }
@@ -791,7 +797,7 @@ thead {
 
 
 
-
+//autocomplete
 
 .autocomplete {
   /*the container must be positioned relative:*/
@@ -837,7 +843,207 @@ thead {
   color: #ffffff;
 }
 
+//skeleton
 
+.skeleton {
+  opacity: .7;
+  animation: skeleton-loading 500ms linear infinite alternate;
+
+  &-text,
+  &-btn,
+  &-block {
+    border-radius: 10px;
+    background: #8e9eab;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(45deg, #eef2f3, #8e9eab);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(45deg, #eef2f3, #8e9eab); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background-size: 150% 150%;
+  }
+
+  &-text {
+    width: 148px;
+    height: 22px;
+    margin-bottom: .25rem;
+  }
+
+  &-text:last-child {
+    width: 50px;
+    height: 20px;
+  }
+
+  &-card {
+    width: 400px;
+    height: 156px;
+    padding: 20px 10px;
+    border-radius: 10px;
+
+  }
+
+  &-block {
+    margin-top: 50px;
+  }
+
+  &-form,
+  &-chart,
+  &-chart--size,
+  &-table,
+  &-card {
+    background: #4b5563;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(-45deg, #4b5563, #d3cce3);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(-45deg, #4b5563, #a7a3b1); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background-size: 150% 150%;
+    box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  &-btn {
+    width: 100px;
+    height: 50px;
+    float: right;
+  }
+
+  &-form, &-chart, &-chart--size, &-table {
+    border-radius: 50px;
+  }
+
+  &-form {
+    width: 600px;
+    height: 288px;
+    padding: 25px 50px;
+    grid-area: block1;
+
+    & .skeleton-text {
+      width: 100%;
+      height: 44px;
+      margin-bottom: 20px;
+    }
+
+    & .skeleton-block {
+      width: 168px;
+      height: 55px;
+      margin: 30px auto 0;
+    }
+  }
+
+  &-chart, &-chart--size {
+    width: 684px;
+    height: 288px;
+    padding: 25px 50px;
+    grid-area: block2;
+
+    & .skeleton-text {
+      width: 100px;
+      height: 20px;
+      margin-bottom: 20px;
+    }
+
+    & .skeleton-block {
+      width: 512px;
+      height: 167px;
+    }
+  }
+
+  &-chart--size {
+    width: 100%;
+    height: 288px;
+
+    &:first-child {
+      grid-area: chart;
+    }
+    &:nth-child(2) {
+      grid-area: ratio;
+    }
+
+    & .skeleton-text {
+      width: 200px;
+    }
+
+    & .skeleton-block {
+      width: 90%;
+    }
+  }
+
+  &-table {
+    width: 100%;
+    height: 288px;
+    padding: 25px 50px;
+    grid-area: history;
+
+    & .skeleton-text {
+      width: 200px;
+      height: 20px;
+      margin-bottom: 20px;
+    }
+
+    & .skeleton-block {
+      width: 100%;
+      height: 180px;
+      float: none;
+    }
+
+  }
+
+  &-wrap1 {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 50px;
+
+    & .skeleton-text {
+      width: 540px;
+      height: 40px;
+    }
+
+    & .skeleton-text:last-child {
+      width: 225px;
+      height: 40px;
+    }
+  }
+
+  &-wrap2, &-wrap3 {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto;
+    grid-template-areas: 'block1 block2'
+                         'history history';
+    gap: 50px;
+  }
+
+  &-wrap3 {
+    grid-template-areas: 'block2 history'
+                         'block1 history';
+    & .skeleton-chart {
+      width: 588px;
+      height: 411px;
+
+      & .skeleton-block {
+        width: 100%;
+      }
+    }
+
+    & .skeleton-table {
+      width: 703px;
+      height: 728px;
+    }
+
+    & .skeleton-form {
+      width: 588px;
+      height: 273px;
+    }
+  }
+}
+
+.--width {
+  width: 400px;
+  height: 40px;
+}
+
+@keyframes skeleton-loading {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 100% 0;
+  }
+}
 
 @media (min-width: 320px) and (max-width: 767px) {
   h1 {
