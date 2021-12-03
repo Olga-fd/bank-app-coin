@@ -3,8 +3,6 @@ import validator from 'validator';
 import { el, setChildren } from 'redom';
 import { createListOfAccounts } from '../index.js';
 import { showSpecificTemplate } from './skeleton.js';
-// import { init } from './map.js';
-// import { getMap } from './api.js';
 
 function delAttr() {
   const submit = document.querySelector('[type="submit"]');
@@ -71,22 +69,6 @@ export async function returnFromHistory() {
     checkAccount(5, 6);
   });
 }
-// export function changeURL() {
-//   window.addEventListener('popstate', async function () {
-//     // console.log("location: " + location.href + ", state: " + JSON.stringify(event.state));
-//     //history.pushState({page: 1}, "title 1", `${window.location.search}`);
-//     let { checkAccount } = await import('../index.js');
-//     let { getDataWithAccounts } = await import('./api.js');
-//     const pageParams = new URLSearchParams(window.location.search);
-//     if (pageParams.get('accounts')) {
-//       document.querySelector('body').innerHTML = '';
-//       getDataWithAccounts();
-//     } else if (pageParams.get('id')) {
-//       document.querySelector('main container').innerHTML = '';
-//       checkAccount();
-//     }
-//   });
-// }
 
 export async function openAccount(blockOfAccounts) {
   let { modifyPanel, checkAccount } = await import('../index.js');
@@ -132,7 +114,6 @@ export function validate() {
 
 export function validateFormTrans() {
   const formInputs = document.querySelectorAll('.form__input');
-  //const accNum = document.getElementById('accNum').value.length;|| accNum < 16
   formInputs.forEach((input) => {
     input.addEventListener('blur', () => {
       const lengthInput = validator.isLength(input.value);
@@ -141,10 +122,6 @@ export function validateFormTrans() {
 
       if (lengthInput == false || space == true || isNumeric == false || input.value <= 0 ) {
         input.classList.add('error--border');
-      // console.log(lengthInput == false);
-      // console.log(space == true);
-      // console.log(isNumeric == false);
-      // console.log(input.value <= 0);
       } else {
         input.classList.add('success--border');
       }
@@ -160,28 +137,6 @@ export function validateFormTrans() {
     });
   })
 }
-
-// export function validateSum() {
-//   const formInput = document.querySelector('.form__input');
-//   const btn = document.querySelector('[type="submit"]');
-//   formInput.addEventListener('blur', () => {
-//     if (parseInt(formInput.value.trim()) > 0 && typeof parseInt(formInput.value.trim()) == 'number'
-//     ) {
-//       formInput.classList.remove('error--border');
-//       formInput.classList.add('success--border');
-
-//       btn.removeAttribute('disabled', 'disabled');
-//     } else {
-//       formInput.classList.remove('success--border');
-//       formInput.classList.add('error--border');
-//       return;
-//     }
-//   });
-  // formInput.addEventListener('focus', () => {
-  //   let elem = document.activeElement;
-  //   if (elem !== btn) cleanError(elem);
-  // }, true);
-//}
 
 export async function sendMoney() {
   let { transfer } = await import('../index.js');
@@ -302,35 +257,53 @@ export async function exchangeCurrency() {
 export async function showATM() {
   const atm = document.querySelector('.atm');
   const main = document.querySelector('main .container');
-  //const body = document.querySelector('body');
   let {createBankTemplate, showSpecificTemplate} = await import('./skeleton.js');
-//let {getCoordinates} = await import('./api.js');
+  let {getCoordinates} = await import('./api.js');
+  const data = await getCoordinates();
+  const coordinates = data.payload;
+
   atm.addEventListener('click', async (e) => {
     e.preventDefault();
-    //let {init} = await import('./map.js');
     main.innerHTML = '';
     createBankTemplate();
-    showSpecificTemplate('template4', 'main .container')
-    // setChildren(main, [
-    //   el('h2.main__title', 'Банкоматы'),
-    //   el('#map'),
-    // ]);
-    // getCoordinates();
-    //let script1 = el('script', {type: "text/javascript"}, `
-      //let myMap;
-      //function init() {
-        //let myMap;
-       // init(ymaps);
-      //}
-    //`);
-    // let script2 = el('script', {
-    //   src: 'https://api-maps.yandex.ru/2.1/?apikey=0c61dc80-6967-49f4-b0be-8b4ff68d5dda&lang=ru_RU',
-    //   type: 'text/javascript'
-    // })
+    showSpecificTemplate('template4', 'main .container');
+//setTimeout(() => {
+  setChildren(main, [
+      el('h2.main__title', {style: 'margin-bottom: 56px'}, 'Карта банкоматов'),
+      el('#map'),
+      el('script', {src: 'https://api-maps.yandex.ru/2.1/?apikey=0c61dc80-6967-49f4-b0be-8b4ff68d5dda&load=package.standard&lang=ru-RU'}),
+    ]);
+    let state = false;
+    atm.addEventListener('mousemove', () => {
+      if (state === false) {
+        state = true;
+        ymaps.ready(function () {
+          let myMap = new ymaps.Map("map", {
+            center: [55.76, 37.64],
+            zoom: 10,
+            behaviors: ['default', 'scrollZoom']
+          });
 
-    //body.append(script1);
+          for (let i = 0; i < coordinates.length; i++) {
+            let myGeoObject = new ymaps.GeoObject({
+              geometry: {
+                type: "Point", // тип геометрии - точка
+                coordinates: [coordinates[i].lat, coordinates[i].lon] // координаты точки
+              },
+              properties: {
+                hintContent: 'Coin',
+              },
+            });
 
-  })
+            // Размещение геообъекта на карте.
+            myMap.geoObjects.add(myGeoObject);
+          }
+        });
+      };
+    });
+//}, 100)
+
+  });
 }
 
 export async function logout() {
