@@ -5,7 +5,6 @@ import { createSelect } from './js/select.js';
 import { format } from 'd3-format';
 import { showSpecificTemplate } from './js/skeleton.js';
 import { returnFromHistory } from './js/handlers.js';
-//?episode_id=${object.results[num].episode_id}
 
 export async function createLoginScreen() {
   history.pushState(null, '', '../index.html');
@@ -110,6 +109,7 @@ export async function createHeader() {
   showAccounts();
   showCurrencyExchange();
   logout();
+  createBurgerMenu();
 }
 
 export async function createPanel() {
@@ -350,24 +350,10 @@ async function createForm(form) {
   return form;
 }
 
-function writeInputValues(arr) {
-  let input = document.getElementById('accNum');
-
-  input.addEventListener('change', () => {
-    let record = input.value;
-    if (record.length > 16) {
-      arr.push(record);
-      localStorage.setItem('records', JSON.stringify(arr));
-    }
-    if (arr.length > 10) {
-      arr = [];
-    }
-  });
-}
-
 export async function checkAccount(n, m) {
   let { autocomplete } = await import('./js/autocomplete.js');
   let { getDataOfAccount } = await import('./js/api.js');
+  let { writeInputValues } = await import('./js/handlers.js');
   let data = await getDataOfAccount();
   let dataForChart = await getBalance(data, n, m);
   let { sendMoney, showDynamics, validateFormTrans } = await import(
@@ -383,7 +369,6 @@ export async function checkAccount(n, m) {
   } else {
     blockOfData = el('.main__block-data');
   }
-  console.log(blockOfData);
 
   const form = el('form.form_trans', { class: 'options', autocomplete: 'off' });
   const dynamics = el('section.main__dynamics');
@@ -408,9 +393,6 @@ export async function checkAccount(n, m) {
     ]);
     setChildren(block, [wrap, blockOfData]);
   }
-  // else {
-  //   block.append(blockOfData);
-  // }
 
   let arrGlobal = [];
   let storage = localStorage.getItem('records');
@@ -589,27 +571,14 @@ export async function changePanel() {
 }
 
 export async function showHistoryOfBalance(data, dynamics) {
-  // let { getDataOfAccount } = await import('./js/api.js');data = await getDataOfAccount();
-  //const blockOfAccounts = document.querySelector('.main__block-data');
-  //const dynamics = el('.main__dynamics', { class: 'dynamics--annual' });
-  //setChildren(blockOfAccounts, dynamics);
-  // blockOfAccounts.classList.add('main__block-data--new');
   let { createChart } = await import('./js/charts.js');
-  let dataForChart = await getBalance(data, 11, 12);
+  const dataForChart = await getBalance(data, 11, 12);
   createChartDynamics(dataForChart.newArr, dataForChart.months, dynamics, 1000);
   const canvas = document.querySelector('.main__dynamics canvas');
   createChart(dataForChart.newArr, canvas);
 }
 
 export async function showRatio(data, dynamics) {
-  //let { getDataOfAccount } = await import('./js/api.js');
-  //let data = await getDataOfAccount();
-  //let blockOfAccounts = document.querySelector('.main__block-data--new');
-  // let chart = document.querySelector('.main__dynamics');
-  // let table = document.querySelector('.main__history');
-  //let dynamics = el('section.main__ratio');
-  //setChildren(blockOfAccounts, [chart, dynamics, table]);
-
   let { createStackedChart } = await import('./js/charts.js');
   let dataForChart = await getBalance(data, 11, 12);
   createChartDynamics(dataForChart.objRec, dataForChart.months, dynamics, 1000);
@@ -617,7 +586,6 @@ export async function showRatio(data, dynamics) {
   title.textContent = 'Соотношение входящих и исходящих транзакций';
   let canvas = document.querySelector('.main__ratio canvas');
   createStackedChart(dataForChart.objRec, dataForChart.objExp, canvas);
-  //return dynamics;
 }
 
 function getDates(dates, m) {
@@ -627,20 +595,6 @@ function getDates(dates, m) {
     dates.unshift(date.getMonth() + 2);
   }
 }
-
-window.addEventListener('popstate', async function () {
-  // console.log("location: " + location.href + ", state: " + JSON.stringify(event.state));
-  //history.pushState({page: 1}, "title 1", `${window.location.search}`);
-  //let { checkAccount } = await import('../index.js');
-  const pageParams = new URLSearchParams(window.location.search);
-  if (pageParams.get('accounts')) {
-    document.querySelector('body').innerHTML = '';
-    createListOfAccounts();
-  } else if (pageParams.get('id')) {
-    document.querySelector('main container').innerHTML = '';
-    checkAccount();
-  }
-});
 
 export function createRows(data, rows) {
   for (let value of Object.values(data.payload)) {
@@ -830,11 +784,17 @@ export function byKey(data, key) {
   });
 }
 
-// if (window.matchMedia("(min-width: 320px) and (max-width: 594px)").matches) {
-//   input.setAttribute('placeholder', 'Введите данные');
-// } else {
-//   input.setAttribute('placeholder', 'Введите данные контакта');
-// };
+function createBurgerMenu() {
+  if (window.matchMedia('(min-width: 320px) and (max-width: 767px)').matches) {
+    const header = document.querySelector('.header');
+    const burger = el('.header__burger-menu', [
+      el('div'),
+      el('div'),
+      el('div'),
+    ]);
+    header.append(burger);
+  }
+}
 
 // if (document.documentElement.clientWidth > 768) {
 

@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import validator from 'validator';
 import { el, setChildren } from 'redom';
-import { createListOfAccounts } from '../index.js';
+import { createListOfAccounts, createPanel } from '../index.js';
 import { showSpecificTemplate } from './skeleton.js';
 
 function delAttr() {
@@ -21,7 +21,6 @@ function delAttr() {
 
 export async function createNewAccount() {
   let { createAccount } = await import('./api.js');
-  //let { createListOfAccounts } = await import('../index.js');
   const btn = document.querySelector('.main__btn');
   btn.addEventListener('click', () => {
     const blockOfAccounts = document.querySelector('.main__block');
@@ -33,9 +32,9 @@ export async function createNewAccount() {
 
 export async function showAccounts() {
   let accounts = document.querySelector('.accounts');
-  let { createPanel } = await import('../index.js');
   accounts.addEventListener('click', (e) => {
     e.preventDefault();
+    history.pushState(null, '', './accounts');
     document.querySelector('main .container').innerHTML = '';
     createPanel();
     createListOfAccounts();
@@ -43,9 +42,7 @@ export async function showAccounts() {
 }
 
 export async function returnList() {
-  let { createPanel } = await import('../index.js');
   let btn = document.querySelector('.main__btn');
-
   btn.addEventListener('click', async () => {
     document.querySelector('main .container').innerHTML = '';
     history.pushState(null, '', './accounts');
@@ -69,6 +66,22 @@ export async function returnFromHistory() {
     checkAccount(5, 6);
   });
 }
+// export function changeURL() {
+//   window.addEventListener('popstate', async function () {
+//     // console.log("location: " + location.href + ", state: " + JSON.stringify(event.state));
+//     //history.pushState({page: 1}, "title 1", `${window.location.search}`);
+//     let { checkAccount } = await import('../index.js');
+//     let { getDataWithAccounts } = await import('./api.js');
+//     const pageParams = new URLSearchParams(window.location.search);
+//     if (pageParams.get('accounts')) {
+//       document.querySelector('body').innerHTML = '';
+//       getDataWithAccounts();
+//     } else if (pageParams.get('id')) {
+//       document.querySelector('main container').innerHTML = '';
+//       checkAccount();
+//     }
+//   });
+// }
 
 export async function openAccount(blockOfAccounts) {
   let { modifyPanel, checkAccount } = await import('../index.js');
@@ -114,6 +127,7 @@ export function validate() {
 
 export function validateFormTrans() {
   const formInputs = document.querySelectorAll('.form__input');
+  //const accNum = document.getElementById('accNum').value.length;|| accNum < 16
   formInputs.forEach((input) => {
     input.addEventListener('blur', () => {
       const lengthInput = validator.isLength(input.value);
@@ -122,6 +136,10 @@ export function validateFormTrans() {
 
       if (lengthInput == false || space == true || isNumeric == false || input.value <= 0 ) {
         input.classList.add('error--border');
+      // console.log(lengthInput == false);
+      // console.log(space == true);
+      // console.log(isNumeric == false);
+      // console.log(input.value <= 0);
       } else {
         input.classList.add('success--border');
       }
@@ -137,6 +155,28 @@ export function validateFormTrans() {
     });
   })
 }
+
+// export function validateSum() {
+//   const formInput = document.querySelector('.form__input');
+//   const btn = document.querySelector('[type="submit"]');
+//   formInput.addEventListener('blur', () => {
+//     if (parseInt(formInput.value.trim()) > 0 && typeof parseInt(formInput.value.trim()) == 'number'
+//     ) {
+//       formInput.classList.remove('error--border');
+//       formInput.classList.add('success--border');
+
+//       btn.removeAttribute('disabled', 'disabled');
+//     } else {
+//       formInput.classList.remove('success--border');
+//       formInput.classList.add('error--border');
+//       return;
+//     }
+//   });
+  // formInput.addEventListener('focus', () => {
+  //   let elem = document.activeElement;
+  //   if (elem !== btn) cleanError(elem);
+  // }, true);
+//}
 
 export async function sendMoney() {
   let { transfer } = await import('../index.js');
@@ -184,8 +224,9 @@ export function showCurrencyExchange() {
   let currency = document.querySelector('.currency');
   currency.addEventListener('click', async (e) => {
     e.preventDefault();
+    history.pushState(null, '', './currency');
     document.querySelector('main .container').innerHTML = '';
-    let { showSpecificTemplate, createCurrencyTemplate } = await import('./skeleton.js');
+    let { createCurrencyTemplate } = await import('./skeleton.js');
     let { getCurrencyExchange } = await import('../index.js');
     createCurrencyTemplate();
     showSpecificTemplate('template3', 'main .container');
@@ -257,52 +298,50 @@ export async function exchangeCurrency() {
 export async function showATM() {
   const atm = document.querySelector('.atm');
   const main = document.querySelector('main .container');
-  let {createBankTemplate, showSpecificTemplate} = await import('./skeleton.js');
+  let {createBankTemplate} = await import('./skeleton.js');
   let {getCoordinates} = await import('./api.js');
   const data = await getCoordinates();
   const coordinates = data.payload;
+  const script = el('script', {
+      src: 'https://api-maps.yandex.ru/2.1/?apikey=0c61dc80-6967-49f4-b0be-8b4ff68d5dda&load=package.standard&lang=ru-RU',
+    });
+
+  main.prepend(script);
 
   atm.addEventListener('click', async (e) => {
     e.preventDefault();
     main.innerHTML = '';
+    history.pushState(null, '', '../index.html/ATM');
     createBankTemplate();
     showSpecificTemplate('template4', 'main .container');
-//setTimeout(() => {
-  setChildren(main, [
+
+    setChildren(main, [
       el('h2.main__title', {style: 'margin-bottom: 56px'}, 'Карта банкоматов'),
       el('#map'),
-      el('script', {src: 'https://api-maps.yandex.ru/2.1/?apikey=0c61dc80-6967-49f4-b0be-8b4ff68d5dda&load=package.standard&lang=ru-RU'}),
     ]);
-    let state = false;
-    atm.addEventListener('mousemove', () => {
-      if (state === false) {
-        state = true;
-        ymaps.ready(function () {
-          let myMap = new ymaps.Map("map", {
-            center: [55.76, 37.64],
-            zoom: 10,
-            behaviors: ['default', 'scrollZoom']
-          });
 
-          for (let i = 0; i < coordinates.length; i++) {
-            let myGeoObject = new ymaps.GeoObject({
-              geometry: {
-                type: "Point", // тип геометрии - точка
-                coordinates: [coordinates[i].lat, coordinates[i].lon] // координаты точки
-              },
-              properties: {
-                hintContent: 'Coin',
-              },
-            });
+    ymaps.ready(function () {
+      let myMap = new ymaps.Map("map", {
+        center: [55.76, 37.64],
+        zoom: 10,
+        behaviors: ['default', 'scrollZoom']
+      });
 
-            // Размещение геообъекта на карте.
-            myMap.geoObjects.add(myGeoObject);
-          }
+      for (let i = 0; i < coordinates.length; i++) {
+        let myGeoObject = new ymaps.GeoObject({
+          geometry: {
+            type: "Point", // тип геометрии - точка
+            coordinates: [coordinates[i].lat, coordinates[i].lon] // координаты точки
+          },
+          properties: {
+            hintContent: 'Coin',
+          },
         });
-      };
-    });
-//}, 100)
 
+        // Размещение геообъекта на карте.
+        myMap.geoObjects.add(myGeoObject);
+      }
+    });
   });
 }
 
@@ -325,3 +364,35 @@ export function sortByKey() {
   })
   )
 }
+
+export function writeInputValues(arr) {
+  let input = document.getElementById('accNum');
+
+  input.addEventListener('change', () => {
+    let record = input.value;
+    if (record.length > 16) {
+      arr.push(record);
+      localStorage.setItem('records', JSON.stringify(arr));
+    }
+    if (arr.length > 10) {
+      arr = [];
+    }
+  });
+}
+
+window.addEventListener('popstate', async function () {
+  if (window.location.pathname.includes('index.html/')) {
+    document.querySelector('main .container').innerHTML = '';
+    history.pushState(null, '', './accounts');
+    document.querySelector('.active').classList.remove('active');
+    document.querySelector('.accounts').classList.add('active');
+    createPanel();
+    createListOfAccounts();
+  } else {
+    let {createLoginScreen} = await import('../index.js');
+    createLoginScreen();
+  }
+});
+
+//<script type="text/javascript" charset="utf-8" async src="https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3Af5283b078f08fb4e28eb3d9437c1c6fd8fbf021d209357b4acff6be66702b368&amp;width=100%25&amp;height=728&amp;lang=ru_RU&amp;scroll=true"></script>
+//https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3Af5283b078f08fb4e28eb3d9437c1c6fd8fbf021d209357b4acff6be66702b368&amp;width=100%25&amp;height=728&amp;lang=ru_RU&amp
