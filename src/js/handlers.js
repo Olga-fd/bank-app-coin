@@ -212,7 +212,7 @@ async function createBlocks(blockOfAccounts) {
   const historyOfTransactions = el('.main__history', { class: 'options' });
 
   setChildren(blockOfAccounts, [chart, dynamicsRatio, historyOfTransactions]);
-  dynamicsRatio.style.padding = '25px 98px';
+  //dynamicsRatio.style.padding = '25px 98px';
 
   showHistoryOfBalance(data, chart);
   showRatio(data, dynamicsRatio);
@@ -306,7 +306,7 @@ export async function showATM() {
       src: 'https://api-maps.yandex.ru/2.1/?apikey=0c61dc80-6967-49f4-b0be-8b4ff68d5dda&load=package.standard&lang=ru-RU',
     });
 
-  main.prepend(script);
+  document.querySelector('main').prepend(script);
 
   atm.addEventListener('click', async (e) => {
     e.preventDefault();
@@ -377,6 +377,18 @@ export function writeInputValues(arr) {
     if (arr.length > 10) {
       arr = [];
     }
+  });
+}
+
+export function pushBtn(burger) {
+  burger.addEventListener('click', (e) => {
+    burger.classList.toggle('--modified');
+    const nav = document.querySelector('.header__menu');
+    if (e.currentTarget.id != 'burger') {
+      nav.style.display = 'none';
+    } else if (e.currentTarget.id == 'burger') {
+      nav.style.display = (nav.style.display != 'block') ? 'block' : 'none';
+    };
   });
 }
 

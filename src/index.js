@@ -11,7 +11,7 @@ export async function createLoginScreen() {
   let { validate, submitForm } = await import('./js/handlers.js');
   const header = el('header.header');
   const container = el('.container', { class: 'flex-container' });
-  const fixContainer = el('.container');
+  const fixContainer = el('.container', { class: 'centered' });
   const main = el('main.main');
   const title = el('h1', 'Coin.');
   const menu = el('nav.header__menu');
@@ -23,9 +23,9 @@ export async function createLoginScreen() {
   setChildren(main, fixContainer);
   setChildren(fixContainer, form);
   setChildren(form, [
-    el('fieldset.form__fieldset', { class: '' }, [
-      el('legend.form__legend', { class: '' }, 'Вход в аккаунт'),
-      el('.form__container', { class: '' }, [
+    el('fieldset.form__fieldset', [
+      el('legend.form__legend', 'Вход в аккаунт'),
+      el('.form__container', [
         el('.form__label-box', [
           el('label.form__label', { for: 'login' }, 'Логин'),
           el('input.form__input', {
@@ -76,13 +76,17 @@ export async function createHeader() {
   history.pushState(null, '', '../index.html/accounts');
   let { showATM, logout, setActiveStay, showCurrencyExchange, showAccounts } =
     await import('./js/handlers.js');
+  const header = document.querySelector('.header');
+  const container = document.querySelector('main .container');
   const form = document.querySelector('form');
   const menu = document.querySelector('nav');
   const list = el('ul.header__list');
 
   form.remove();
+  setAttr(header, { style: 'margin-bottom: 2.75rem;' });
+  container.classList.remove('centered');
   setChildren(menu, list);
-  setChildren(list, { class: '' }, [
+  setChildren(list, [
     el('li.header__item', { class: 'list-reset' }, [
       el('a.header__link', { class: 'atm', href: '?ATM' }, 'Банкоматы'),
     ]),
@@ -109,7 +113,23 @@ export async function createHeader() {
   showAccounts();
   showCurrencyExchange();
   logout();
-  createBurgerMenu();
+
+  if (window.matchMedia('(min-width: 320px) and (max-width: 767px)').matches) {
+    createBurgerMenu();
+  }
+}
+
+async function createBurgerMenu() {
+  let { pushBtn } = await import('./js/handlers.js');
+  const header = document.querySelector('.header .container');
+  const burger = el('.header__burger-menu', { id: 'burger' }, [
+    el('div'),
+    el('div'),
+    el('div'),
+  ]);
+  header.append(burger);
+
+  pushBtn(burger);
 }
 
 export async function createPanel() {
@@ -246,9 +266,9 @@ function createChartDynamics(newArr, months, dynamics, wid) {
     'Браузер не поддерживает Canvas'
   );
   const xAxis = el('.xAxis', {}, [
-    el('p.max', `${f(Math.max.apply(null, newArr))}`),
-    el('p.subMax'),
-    el('p.min', `${f(Math.min.apply(null, newArr))}`),
+    el('span.max', `${f(Math.max.apply(null, newArr))}`),
+    el('span.subMax'),
+    el('span.min', `${f(Math.min.apply(null, newArr))}`),
   ]);
   const yAxis = el('.yAxis');
   setChildren(
@@ -302,9 +322,9 @@ export function createTableOfHistory(data, historyOfTransactions) {
 //===Создаем форму транзакций==={ width: 300 },
 async function createForm(form) {
   setChildren(form, [
-    el('fieldset.form__fieldset', { class: '' }, [
-      el('legend.form__legend', { class: '' }, 'Новый перевод'),
-      el('.form__container', { class: '' }, [
+    el('fieldset.form__fieldset', [
+      el('legend.form__legend', 'Новый перевод'),
+      el('.form__container', [
         el('.form__label-box', [
           el('label.form__label', { for: 'accNum' }, 'Номер счёта получателя'),
 
@@ -359,7 +379,7 @@ export async function checkAccount(n, m) {
   let { sendMoney, showDynamics, validateFormTrans } = await import(
     './js/handlers.js'
   );
-  let { createChart } = await import('./js/charts.js');
+  let { createChart, createChartQ } = await import('./js/charts.js');
 
   const block = document.querySelector('.main__block');
   const active = document.querySelector('.active');
@@ -373,6 +393,22 @@ export async function checkAccount(n, m) {
   const form = el('form.form_trans', { class: 'options', autocomplete: 'off' });
   const dynamics = el('section.main__dynamics');
   const historyOfTransactions = el('.main__history', { class: 'options' });
+
+  // if (window.matchMedia('(min-width: 320px) and (max-width: 767px)').matches) {
+  //   createChartDynamics(
+  //     dataForChart.newArr,
+  //     dataForChart.months,
+  //     dynamics,
+  //     300
+  //   );
+  // } else {
+  //   createChartDynamics(
+  //     dataForChart.newArr,
+  //     dataForChart.months,
+  //     dynamics,
+  //     510
+  //   );
+  // }
 
   createChartDynamics(dataForChart.newArr, dataForChart.months, dynamics, 510);
   createForm(form);
@@ -404,6 +440,12 @@ export async function checkAccount(n, m) {
   let records = JSON.parse(localStorage.getItem('records'));
   autocomplete(document.getElementById('accNum'), records);
   let canvas = document.querySelector('.main__dynamics canvas');
+
+  // if (window.matchMedia('(min-width: 320px) and (max-width: 767px)').matches) {
+  //   createChartQ(dataForChart.newArr, canvas, '#116acc', 30);
+  // } else {
+  //   createChart(dataForChart.newArr, canvas);
+  // }
 
   createChart(dataForChart.newArr, canvas);
   showTransactions(data);
@@ -571,7 +613,7 @@ export async function changePanel() {
 }
 
 export async function showHistoryOfBalance(data, dynamics) {
-  let { createChart } = await import('./js/charts.js');
+  let { createChart, createChartQ } = await import('./js/charts.js');
   const dataForChart = await getBalance(data, 11, 12);
   createChartDynamics(dataForChart.newArr, dataForChart.months, dynamics, 1000);
   const canvas = document.querySelector('.main__dynamics canvas');
@@ -579,7 +621,9 @@ export async function showHistoryOfBalance(data, dynamics) {
 }
 
 export async function showRatio(data, dynamics) {
-  let { createStackedChart } = await import('./js/charts.js');
+  let { createStackedChart, createStackedChartQ } = await import(
+    './js/charts.js'
+  );
   let dataForChart = await getBalance(data, 11, 12);
   createChartDynamics(dataForChart.objRec, dataForChart.months, dynamics, 1000);
   const title = document.querySelector('.main__ratio h4');
@@ -607,7 +651,6 @@ export function createRows(data, rows) {
       rows.push(row);
     }
   }
-  console.log(rows);
 }
 
 export async function getCurrencyExchange() {
@@ -685,7 +728,7 @@ export function createFormForCurrencyExchange(form, data2) {
   }
 
   const fieldset = el('fieldset.form__fieldset', { class: '' });
-  const legend = el('legend.form__legend', { class: '' }, 'Обмен валюты');
+  const legend = el('legend.form__legend', 'Обмен валюты');
   const container = el('.form__grid-container', { class: '' });
   const labelBox1 = el('.form__label-box');
   const label1 = el('label.form__label', { for: 'select1' }, 'Из');
@@ -782,18 +825,6 @@ export function byKey(data, key) {
     }
     return 0;
   });
-}
-
-function createBurgerMenu() {
-  if (window.matchMedia('(min-width: 320px) and (max-width: 767px)').matches) {
-    const header = document.querySelector('.header');
-    const burger = el('.header__burger-menu', [
-      el('div'),
-      el('div'),
-      el('div'),
-    ]);
-    header.append(burger);
-  }
 }
 
 // if (document.documentElement.clientWidth > 768) {
