@@ -120,7 +120,7 @@ export async function createHeader() {
 }
 
 async function createBurgerMenu() {
-  let { pushBtn } = await import('./js/handlers.js');
+  let { pushBtn, closeMenu } = await import('./js/handlers.js');
   const header = document.querySelector('.header .container');
   const burger = el('.header__burger-menu', { id: 'burger' }, [
     el('div'),
@@ -130,6 +130,7 @@ async function createBurgerMenu() {
   header.append(burger);
 
   pushBtn(burger);
+  closeMenu();
 }
 
 export async function createPanel() {
@@ -379,7 +380,7 @@ export async function checkAccount(n, m) {
   let { sendMoney, showDynamics, validateFormTrans } = await import(
     './js/handlers.js'
   );
-  let { createChart, createChartQ } = await import('./js/charts.js');
+  let { createChart } = await import('./js/charts.js');
 
   const block = document.querySelector('.main__block');
   const active = document.querySelector('.active');
@@ -453,6 +454,9 @@ export async function checkAccount(n, m) {
   sendMoney();
   showDynamics();
 
+  //if (window.matchMedia('(min-width: 320px) and (max-width: 480px)').matches)
+
+  setLabelsForY('.yAxis span');
   let observer = new IntersectionObserver(showRow, options);
   let visual = document.querySelectorAll('.js-visual');
   let target = visual[visual.length - 1];
@@ -460,6 +464,29 @@ export async function checkAccount(n, m) {
   observer.observe(target);
 }
 
+function setLabelsForY(selector) {
+  const spans = document.querySelectorAll(selector);
+
+  if (window.matchMedia('(min-width: 320px) and (max-width: 480px)').matches) {
+    spans[0].style.paddingLeft = '37.5px';
+    spans[0].style.paddingRight = '32.5px';
+
+    for (let i = 1; i < spans.length; i++) {
+      spans[i].style.paddingLeft = '12.5px';
+      spans[i].style.paddingRight = '32.5px';
+    }
+  } else {
+    let widSpan = spans[0].getBoundingClientRect().width;
+    spans[0].style.paddingLeft = `${35 + (50 - widSpan) / 2}px`;
+    spans[0].style.paddingRight = `${(50 - widSpan) / 2 + 28}px`;
+
+    for (let i = 1; i < spans.length; i++) {
+      let wid = spans[i].getBoundingClientRect().width;
+      spans[i].style.paddingLeft = `${(50 - wid) / 2}px`;
+      spans[i].style.paddingRight = `${(50 - wid) / 2 + 28}px`;
+    }
+  }
+}
 export async function getBalance(data, n, m) {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
@@ -613,23 +640,23 @@ export async function changePanel() {
 }
 
 export async function showHistoryOfBalance(data, dynamics) {
-  let { createChart, createChartQ } = await import('./js/charts.js');
+  let { createChart } = await import('./js/charts.js');
   const dataForChart = await getBalance(data, 11, 12);
   createChartDynamics(dataForChart.newArr, dataForChart.months, dynamics, 1000);
   const canvas = document.querySelector('.main__dynamics canvas');
   createChart(dataForChart.newArr, canvas);
+  setLabelsForY('.main__dynamics .yAxis span');
 }
 
 export async function showRatio(data, dynamics) {
-  let { createStackedChart, createStackedChartQ } = await import(
-    './js/charts.js'
-  );
+  let { createStackedChart } = await import('./js/charts.js');
   let dataForChart = await getBalance(data, 11, 12);
   createChartDynamics(dataForChart.objRec, dataForChart.months, dynamics, 1000);
   const title = document.querySelector('.main__ratio h4');
   title.textContent = 'Соотношение входящих и исходящих транзакций';
   let canvas = document.querySelector('.main__ratio canvas');
   createStackedChart(dataForChart.objRec, dataForChart.objExp, canvas);
+  setLabelsForY('.main__ratio .yAxis span');
 }
 
 function getDates(dates, m) {

@@ -26,7 +26,6 @@ export async function authorize(myLogin, myPassword) {
       }),
     });
     data = await response.json();
-    console.log(data);
     tokenId = data.payload.token;
     createHeader();
     createListOfAccounts();

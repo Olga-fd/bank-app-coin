@@ -384,10 +384,8 @@ export function pushBtn(burger) {
   burger.addEventListener('click', (e) => {
     burger.classList.toggle('--modified');
     const nav = document.querySelector('.header__menu');
-    if (e.currentTarget.id != 'burger') {
-      nav.style.display = 'none';
-    } else if (e.currentTarget.id == 'burger') {
-      nav.style.display = (nav.style.display != 'block') ? 'block' : 'none';
+    if (e.currentTarget.id == 'burger') {
+      nav.style.opacity = (nav.style.opacity != 1) ? 1 : 0;
     };
   });
 }
@@ -405,6 +403,17 @@ window.addEventListener('popstate', async function () {
     createLoginScreen();
   }
 });
+
+export function closeMenu() {
+  document.body.addEventListener('click', (e) => {
+    const nav = document.querySelector('.header__menu');
+    const target = e.target;
+    if (!target.closest('nav') && !target.closest('.header__burger-menu')) { // если этот элемент или его родительские элементы не окно навигации и не кнопка
+      nav.style.opacity = 0;
+    }
+  })
+}
+
 
 //<script type="text/javascript" charset="utf-8" async src="https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3Af5283b078f08fb4e28eb3d9437c1c6fd8fbf021d209357b4acff6be66702b368&amp;width=100%25&amp;height=728&amp;lang=ru_RU&amp;scroll=true"></script>
 //https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3Af5283b078f08fb4e28eb3d9437c1c6fd8fbf021d209357b4acff6be66702b368&amp;width=100%25&amp;height=728&amp;lang=ru_RU&amp

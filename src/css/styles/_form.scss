@@ -1,6 +1,10 @@
+
+form {
+  //outline: 2px dashed blue;
+}
 .form {
   width: 500px;
-  min-height: 366px;
+  height: 366px;
   margin: auto;
 
   &__fieldset {
@@ -41,6 +45,7 @@
 
   &_trans {
     width: 600px;
+    min-width: 300px;
     height: 288px;
     grid-area: form;
 
@@ -100,7 +105,7 @@ fieldset {
 
 .form__grid-container {
   display: grid;
-  grid-template-columns: 358px 104px;
+  grid-template-columns:  22.375rem 6.5rem;
   grid-template-rows: 44px 44px;
   grid-template-areas: 'label1  btn'
                        'label2 btn';
@@ -134,52 +139,17 @@ fieldset {
 
 }
 
-
-@media (min-width: 320px) and (max-width: 767px) {
-
+@media (min-width: 320px) and (max-width: 480px) {
   .form {
+    width: 100%;
 
-    &_trans {
-      width: 100vw;
-      height: 200px;
-outline: 1px dashed blue;
+    &__container {
+      width: 99%;
+      align-items: flex-start;
 
-      & fieldset {
-        padding: 5px;
+      & input {
+        width: 15rem;
       }
-
-      & legend {
-        padding-top: 10px;
-        font-size: 1rem;
-        line-height: 2;
-      }
-
-      & .btn {
-        margin-left: 0;
-      }
-      & .form__container {
-        align-items: center;
-        justify-content: center;
-
-      }
-
-      & .form__label-box {
-        // display: flex;
-        // justify-content: center;
-        // flex-flow: column;
-        padding-bottom: 10px;
-      }
-
-      & .form__label {
-
-        font-size: 0.7em;
-      }
-
     }
-
-
-
-
   }
-
 }
