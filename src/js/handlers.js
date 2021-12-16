@@ -212,8 +212,6 @@ async function createBlocks(blockOfAccounts) {
   const historyOfTransactions = el('.main__history', { class: 'options' });
 
   setChildren(blockOfAccounts, [chart, dynamicsRatio, historyOfTransactions]);
-  //dynamicsRatio.style.padding = '25px 98px';
-
   showHistoryOfBalance(data, chart);
   showRatio(data, dynamicsRatio);
   createTableOfHistory(data, historyOfTransactions);
@@ -385,7 +383,7 @@ export function pushBtn(burger) {
     burger.classList.toggle('--modified');
     const nav = document.querySelector('.header__menu');
     if (e.currentTarget.id == 'burger') {
-      nav.style.opacity = (nav.style.opacity != 1) ? 1 : 0;
+      nav.style.display = (nav.style.display != 'block') ? 'block' : 'none';
     };
   });
 }
@@ -409,7 +407,7 @@ export function closeMenu() {
     const nav = document.querySelector('.header__menu');
     const target = e.target;
     if (!target.closest('nav') && !target.closest('.header__burger-menu')) { // если этот элемент или его родительские элементы не окно навигации и не кнопка
-      nav.style.opacity = 0;
+      nav.style.display = 'none';
     }
   })
 }

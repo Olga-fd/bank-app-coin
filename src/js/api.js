@@ -1,5 +1,3 @@
-import { showErrorForCurrency } from './errors.js';
-
 export let tokenId;
 //import ErrorComponent from './errors.js';
 
@@ -26,6 +24,7 @@ export async function authorize(myLogin, myPassword) {
       }),
     });
     data = await response.json();
+    console.log(data);
     tokenId = data.payload.token;
     createHeader();
     createListOfAccounts();

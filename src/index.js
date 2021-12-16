@@ -29,10 +29,9 @@ export async function createLoginScreen() {
         el('.form__label-box', [
           el('label.form__label', { for: 'login' }, 'Логин'),
           el('input.form__input', {
-            class: '',
             type: 'text',
             id: 'login',
-            value: 'developer',
+            //value: 'developer',
             placeholder: 'Placeholder',
           }),
           el('span', {
@@ -45,10 +44,9 @@ export async function createLoginScreen() {
         el('.form__label-box', [
           el('label.form__label', { for: 'password' }, 'Пароль'),
           el('input.form__input', {
-            class: '',
             type: 'password',
             id: 'password',
-            value: 'skillbox',
+            //value: 'skillbox',
             placeholder: 'Placeholder',
           }),
           el('span', {
@@ -59,11 +57,7 @@ export async function createLoginScreen() {
           }),
         ]),
       ]),
-      el(
-        'button.btn',
-        { class: '', type: 'submit', disabled: 'disabled' },
-        'Войти'
-      ),
+      el('button.btn', { type: 'submit', disabled: 'disabled' }, 'Войти'),
     ]),
   ]);
   validate();
@@ -199,9 +193,12 @@ export async function modifyPanel() {
 }
 
 export async function createListOfAccounts() {
-  let { openAccount } = await import('./js/handlers.js');
+  // let { openAccount } = await import('./js/handlers.js');
   let { getInfoAboutAccounts } = await import('./js/api.js');
   let data = await getInfoAboutAccounts();
+  let newData = data.payload.filter((x) => x['transactions'].length > 0);
+  console.log(newData);
+  let exception = data.payload.find((y) => y['transactions'].length == 0);
   const blockOfAccounts = document.querySelector('.main__block');
   const selected = document.querySelector('.select-selected');
   const cards = [];
@@ -211,15 +208,70 @@ export async function createListOfAccounts() {
   } else if (selected.innerHTML == 'По балансу') {
     byKey(data, 'balance');
   } else if (selected.innerHTML == 'По последней транзакции') {
-    byKey(data, 'transactions.date');
+    byTrans(newData, exception);
   }
 
-  for (let i = 0; i < data.payload.length; i++) {
+  if (selected.innerHTML == 'По последней транзакции') {
+    createCardBlock(newData, cards, blockOfAccounts);
+  } else {
+    createCardBlock(data.payload, cards, blockOfAccounts);
+  }
+
+  // for (let i = 0; i < data.payload.length; i++) {
+  //   let cardBlock = el('.main__card_block');
+  //   let date, ms;
+  //   let length = data.payload[i].transactions.length;
+  //   if (length !== 0) {
+  //     ms = new Date(data.payload[i].transactions[length - 1].date);
+  //     date = new Date(data.payload[i].transactions[length - 1].date)
+  //       .toLocaleString('ru', {
+  //         day: 'numeric',
+  //         month: 'long',
+  //         year: 'numeric',
+  //       })
+  //       .slice(0, -2);
+  //   } else {
+  //     date = 'Данные отсутствуют';
+  //   }
+
+  //   let card = el('.main__card');
+  //   let number = el('h3.main__card_number', data.payload[i].account);
+  //   let amount = el(
+  //     'p.main__card_balance',
+  //     `${data.payload[i].balance.toLocaleString('ru')} ₽`
+  //   );
+  //   let btnOpen = el(
+  //     'a.btn',
+  //     { class: 'main__btn-open', href: `?id=${data.payload[i].account}` },
+  //     'Открыть'
+  //   );
+
+  //   let dateOfTransaction = el('div.main__trans-block', [
+  //     el('h4.main__transaction', 'Последняя транзакция:'),
+  //     el(
+  //       'time.main__trans-date',
+  //       { 'data-date': `${new Date(ms).getTime()}` },
+  //       `${date}`
+  //     ),
+  //   ]);
+  //   setChildren(cardBlock, [dateOfTransaction, btnOpen]);
+  //   setChildren(card, [number, amount, cardBlock]);
+  //   setChildren(blockOfAccounts, card);
+  //   cards.push(card);
+  // }
+  // setChildren(blockOfAccounts, cards);
+  // openAccount(blockOfAccounts);
+}
+
+async function createCardBlock(array, cards, blockOfAccounts) {
+  let { openAccount } = await import('./js/handlers.js');
+  for (let i = 0; i < array.length; i++) {
     let cardBlock = el('.main__card_block');
-    let date;
-    let length = data.payload[i].transactions.length;
+    let date, ms;
+    let length = array[i].transactions.length;
     if (length !== 0) {
-      date = new Date(data.payload[i].transactions[length - 1].date)
+      ms = new Date(array[i].transactions[length - 1].date);
+      date = new Date(array[i].transactions[length - 1].date)
         .toLocaleString('ru', {
           day: 'numeric',
           month: 'long',
@@ -231,20 +283,24 @@ export async function createListOfAccounts() {
     }
 
     let card = el('.main__card');
-    let number = el('h3.main__card_number', data.payload[i].account);
+    let number = el('h3.main__card_number', array[i].account);
     let amount = el(
       'p.main__card_balance',
-      `${data.payload[i].balance.toLocaleString('ru')} ₽`
+      `${array[i].balance.toLocaleString('ru')} ₽`
     );
     let btnOpen = el(
       'a.btn',
-      { class: 'main__btn-open', href: `?id=${data.payload[i].account}` },
+      { class: 'main__btn-open', href: `?id=${array[i].account}` },
       'Открыть'
     );
 
     let dateOfTransaction = el('div.main__trans-block', [
       el('h4.main__transaction', 'Последняя транзакция:'),
-      el('time.main__trans-date', `${date}`),
+      el(
+        'time.main__trans-date',
+        { 'data-date': `${new Date(ms).getTime()}` },
+        `${date}`
+      ),
     ]);
     setChildren(cardBlock, [dateOfTransaction, btnOpen]);
     setChildren(card, [number, amount, cardBlock]);
@@ -331,7 +387,6 @@ async function createForm(form) {
 
           el('.autocomplete', [
             el('input.form__input', {
-              class: '',
               type: 'text',
               id: 'accNum',
               list: 'list',
@@ -348,7 +403,6 @@ async function createForm(form) {
         el('.form__label-box', [
           el('label.form__label', { for: 'amountTrans' }, 'Сумма перевода'),
           el('input.form__input', {
-            class: '',
             type: 'number',
             id: 'amountTrans',
             placeholder: 'Placeholder',
@@ -395,26 +449,9 @@ export async function checkAccount(n, m) {
   const dynamics = el('section.main__dynamics');
   const historyOfTransactions = el('.main__history', { class: 'options' });
 
-  // if (window.matchMedia('(min-width: 320px) and (max-width: 767px)').matches) {
-  //   createChartDynamics(
-  //     dataForChart.newArr,
-  //     dataForChart.months,
-  //     dynamics,
-  //     300
-  //   );
-  // } else {
-  //   createChartDynamics(
-  //     dataForChart.newArr,
-  //     dataForChart.months,
-  //     dynamics,
-  //     510
-  //   );
-  // }
-
   createChartDynamics(dataForChart.newArr, dataForChart.months, dynamics, 510);
   createForm(form);
   createTableOfHistory(data, historyOfTransactions);
-
   setChildren(blockOfData, [form, dynamics, historyOfTransactions]);
 
   if (active) {
@@ -442,21 +479,18 @@ export async function checkAccount(n, m) {
   autocomplete(document.getElementById('accNum'), records);
   let canvas = document.querySelector('.main__dynamics canvas');
 
-  // if (window.matchMedia('(min-width: 320px) and (max-width: 767px)').matches) {
-  //   createChartQ(dataForChart.newArr, canvas, '#116acc', 30);
-  // } else {
-  //   createChart(dataForChart.newArr, canvas);
-  // }
-
   createChart(dataForChart.newArr, canvas);
   showTransactions(data);
   validateFormTrans();
   sendMoney();
   showDynamics();
-
-  //if (window.matchMedia('(min-width: 320px) and (max-width: 480px)').matches)
-
   setLabelsForY('.yAxis span');
+
+  if (data.payload.transactions.length == 0) {
+    dynamics.style.display = 'none';
+    historyOfTransactions.style.display = 'none';
+  }
+
   let observer = new IntersectionObserver(showRow, options);
   let visual = document.querySelectorAll('.js-visual');
   let target = visual[visual.length - 1];
@@ -697,7 +731,7 @@ export async function getCurrencyExchange() {
   const block = el('.main__block', {
     class: 'main__block-data main__block-data--currency',
   });
-  const form = el('form.main__form-currency', { class: '' });
+  const form = el('form.main__form-currency');
   const rows = [];
   createRows(data1, rows);
 
@@ -754,9 +788,9 @@ export function createFormForCurrencyExchange(form, data2) {
     codes2.push(code);
   }
 
-  const fieldset = el('fieldset.form__fieldset', { class: '' });
+  const fieldset = el('fieldset.form__fieldset');
   const legend = el('legend.form__legend', 'Обмен валюты');
-  const container = el('.form__grid-container', { class: '' });
+  const container = el('.form__grid-container');
   const labelBox1 = el('.form__label-box');
   const label1 = el('label.form__label', { for: 'select1' }, 'Из');
   let customSelect1 = el('.custom-select', { class: 'first', id: 'select1' });
@@ -765,7 +799,7 @@ export function createFormForCurrencyExchange(form, data2) {
   let customSelect2 = el('.custom-select', { class: 'second', id: 'select2' });
   const select2 = el('select.main__select', codes2);
   const labelBox2 = el('.form__label-box', [
-    el('label.form__label', { for: '' }, 'Сумма'),
+    el('label.form__label', 'Сумма'),
     el('input.form__input', {
       type: 'text',
       placeholder: 'Placeholder',
@@ -854,6 +888,18 @@ export function byKey(data, key) {
   });
 }
 
-// if (document.documentElement.clientWidth > 768) {
-
-// }
+export function byTrans(newData, exception) {
+  newData.sort((a, b) => {
+    // eslint-disable-next-line prettier/prettier
+    if (new Date(a['transactions'][0].date).getTime() > new Date(b['transactions'][0].date).getTime()) {
+      return 1;
+    }
+    // eslint-disable-next-line prettier/prettier
+    if (new Date(a['transactions'][0].date).getTime() < new Date(b['transactions'][0].date).getTime()) {
+      return -1;
+    }
+    return 0;
+  });
+  newData.push(exception);
+  return newData;
+}

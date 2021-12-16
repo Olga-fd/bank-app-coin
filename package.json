@@ -22,6 +22,7 @@
     "babel-loader": "^8.2.2",
     "copy-webpack-plugin": "^9.0.1",
     "css-loader": "^6.2.0",
+    "cypress": "^9.1.1",
     "d3-format": "^3.0.1",
     "eslint": "^8.0.0",
     "eslint-config-prettier": "^8.3.0",
@@ -46,7 +47,6 @@
     "webpack-dev-server": "^4.1.0"
   },
   "dependencies": {
-    "chart.js": "^3.6.0",
     "redom": "^3.27.1",
     "validator": "^13.7.0"
   }
