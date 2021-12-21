@@ -446,6 +446,7 @@ button:disabled {
 
   &__block {
     width: 100%;
+    transition: .3s ease-in-out;;
   }
 
   &__block-data {
@@ -469,13 +470,18 @@ button:disabled {
       grid-template-areas: "chart"
                            "ratio"
                            "history ";
+
+      & canvas,
+      & .main__history {
+        cursor: default;
+      }
     }
   }
 
   &__dynamics {
     width: 42.75rem;
     grid-area: chart;
-    cursor: pointer;
+    cursor: move;
   }
 
   &__dynamics,
@@ -501,6 +507,8 @@ button:disabled {
     box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.25);
     border-radius: 50px;
     grid-area: form;
+    cursor: move;
+
 
     & .form__legend {
       padding-top: 0;
@@ -515,6 +523,7 @@ button:disabled {
     min-height: 21.56rem;
     grid-area: history;
     padding: 25px 50px;
+    cursor: pointer;
   }
 
   &__ratio {
@@ -528,6 +537,7 @@ button:disabled {
     box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.25);
     border-radius: 50px;
     grid-area: currency;
+    cursor: move;
   }
 
   &__section_ul {
@@ -740,6 +750,7 @@ h4 {
 
 canvas {
   border: 1px solid black;
+  cursor: pointer;
 }
 
 .xAxis {
@@ -1188,7 +1199,6 @@ thead {
 @media screen and (max-width: 1025px) {
 
   .main {
-
     &__account,
     &__balance {
       font-size: 1.1rem;
@@ -1294,6 +1304,43 @@ thead {
       }
     }
   }
+
+  .skeleton {
+    &-card {
+      width: 100%;
+    }
+
+    &-form, &-chart, &-table {
+      width: 95vw !important;
+
+      & .skeleton-text {
+        height: 23px;
+      }
+    }
+
+    &-wrap1 {
+      display: flex;
+      flex-flow: wrap;
+    }
+
+    &-wrap2, &-wrap3 {
+      grid-template-areas:'block1'
+                          'block2'
+                          'history';
+      }
+
+      & .skeleton-table {
+        height: 326px;
+      }
+
+      & .skeleton-chart {
+        height: 325px;
+
+        & .skeleton-block {
+          width: 97%;
+        }
+      }
+  }
 }
 
 @media screen and (max-width: 769px) {
@@ -1304,7 +1351,7 @@ thead {
 
   .form_trans {
     width: 71vw;
-    height: 300px;
+    height: 320px;
 
     &  .form__label-box {
       display: flex;
@@ -1328,15 +1375,15 @@ thead {
 
     &__menu {
       position: absolute;
-      //display: none;
+      display: none;
       top: 69px;
       left: 0;
       width: 100vw;
       height: auto;
       z-index: 99;
       background-color: $primary-color;
-      opacity: 0;
-      transition: opacity 0.4s cubic-bezier(0.1, 0.2, 0.2, 0.1);
+      // opacity: 0;
+      //transition: background-color 0.4s cubic-bezier(0.1, 0.2, 0.2, 0.1);
     }
 
     &__list {
@@ -1390,10 +1437,8 @@ thead {
       margin-bottom: 10px;
     }
 
-    & h4 {
-      position: sticky;
-      left: 0;
-      z-index: 99;
+    &__block-data--new {
+      gap: 10px;
     }
 
     &__block-data--currency {
@@ -1403,26 +1448,23 @@ thead {
       }
     }
   }
+  .js-icon {
+    top: 30px;
+  }
+
+  .js-notification {
+    padding: 0;
+    font-size: 0.8rem;
+    left: 0;
+    bottom: -3%;
+  }
+
+
 }
 //   .autocomplete {
 //     width: 240px;
 //   }
 
-//   .js-notification {
-//     font-size: .6rem;
-//     bottom: -5px;
-//     left: -30px;
-//   }
-
-//   .js-icon {
-//     top: 19px;
-//     right: 28px;
-//   }
-
-//   // .options {
-//   //   border-radius: 0;
-//   //   background: transparent;
-//   // }
 
 //   .--modified {
 //     & div:nth-child(2) {
@@ -1472,52 +1514,6 @@ thead {
 //     }
 //   }
 
-//   .main {
-//     &__account {
-//       font-weight: 500;
-//     }
-//     &__btn {
-//       padding: 10px;
-//       font-size: 0.5em;
-
-//       &_title {
-//         display: none;
-//       }
-//     }
-
-//     &__title {
-//       margin-bottom: 6px;
-//     }
-
-//     &__wrap {
-//       display: flex;
-//       flex-flow: wrap;
-//       justify-content: space-between;
-//       align-items: center;
-//     }
-
-//     &__section-private,
-//     &__section-rate,
-//     &__form-currency  {
-//       width: 95vw;
-//     }
-
-//     &__section-rate {
-//       height: 70vh;
-//     }
-
-//     &__dynamics,
-//     &__ratio {
-//       width: calc(100vw - 10px);
-//       padding: 0;
-//       box-shadow: none;
-//       border-radius: 0;
-
-//       & .xAxis {
-//         top: 17%;
-//       }
-//     }
-//   }
 
 //   .chart-block {
 
@@ -1540,18 +1536,38 @@ thead {
     width: 15.75rem;
   }
 
-  .form_trans {
-    width: 90vw;
+  .form {
+    &_trans {
+      width: 90vw;
 
 
-    & fieldset {
-      padding: 1.5rem 1.5rem;
+
+      & fieldset {
+        padding: 1.5rem 1.5rem;
+      }
     }
+
+    &__grid-container {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    &__container {
+      padding-bottom: 15px;
+    }
+
+    &__label-box:first-child .js-icon {
+      right: 28px;
+    }
+
+    & .js-icon {
+      right: 28px;
+    }
+
   }
 
-  .form__grid-container {
-    display: flex;
-    flex-wrap: wrap;
+  .options {
+    border-radius: 20px;
   }
 
   .main {
@@ -1591,6 +1607,16 @@ thead {
     }
   }
 
+  .js-icon {
+    top: 30px;
+  }
+
+  .js-notification {
+    padding: 0;
+    font-size: 0.8rem;
+    left: 0;
+    bottom: -3%;
+  }
 
   .send {
     padding: .5rem;
@@ -1615,13 +1641,70 @@ thead {
       left: 9px;
       z-index: 99;
     }
+
+    & h4 {
+      position: sticky;
+      left: 0;
+      z-index: 99;
+    }
   }
 
   .main__ratio .xAxis {
     top: 38%;
   }
+
 }
 // @media (min-width: 481px) and (max-width: 768px)
 // @media (min-width: 769px) and (max-width: 1024px)
 // @media (min-width: 1025px) and (max-width: 1200px)
 // @media (min-width: 1201px)
+
+
+[draggable] {
+  user-select: none;
+}
+
+.over {
+  border: 5px solid $warning-color;
+}
+
+.area-rate {
+  grid-area: rate;
+}
+
+.area-currency {
+  grid-area: currency;
+}
+
+.area-form {
+  grid-area: form;
+}
+
+.area-chart {
+  grid-area: chart;
+}
+
+.js-visa {
+  display: block;
+  background-position: right center;
+  background-position-x: 98%;
+  background-size: 57px 56px;
+  background-image: url('../assets/images/visa.png');
+  background-repeat: no-repeat;
+}
+.js-mc {
+  display: block;
+  background-position: right center;
+  background-position-x: 98%;
+  background-size: 57px 49px;
+  background-image: url('../assets/images/mastercard.png');
+  background-repeat: no-repeat;
+}
+.js-mir {
+  display: block;
+  background-position: right center;
+  background-position-x: 98%;
+  background-size: 57px 16px;
+  background-image: url('../assets/images/mir.png');
+  background-repeat: no-repeat;
+}

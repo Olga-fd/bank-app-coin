@@ -1,10 +1,12 @@
 import { el, setChildren, setAttr, setStyle } from 'redom';
 import './css/style.scss';
-//const checkWithMoonAlg = require('./moon.js');
+import validator from 'validator';
 import { createSelect } from './js/select.js';
 import { format } from 'd3-format';
 import { showSpecificTemplate } from './js/skeleton.js';
 import { returnFromHistory } from './js/handlers.js';
+import { drag } from './js/drag-swap.js';
+const checkWithMoonAlg = require('./js/moon.js');
 
 export async function createLoginScreen() {
   history.pushState(null, '', '../index.html');
@@ -193,11 +195,9 @@ export async function modifyPanel() {
 }
 
 export async function createListOfAccounts() {
-  // let { openAccount } = await import('./js/handlers.js');
   let { getInfoAboutAccounts } = await import('./js/api.js');
   let data = await getInfoAboutAccounts();
   let newData = data.payload.filter((x) => x['transactions'].length > 0);
-  console.log(newData);
   let exception = data.payload.find((y) => y['transactions'].length == 0);
   const blockOfAccounts = document.querySelector('.main__block');
   const selected = document.querySelector('.select-selected');
@@ -265,6 +265,7 @@ export async function createListOfAccounts() {
 
 async function createCardBlock(array, cards, blockOfAccounts) {
   let { openAccount } = await import('./js/handlers.js');
+  //console.log(array);
   for (let i = 0; i < array.length; i++) {
     let cardBlock = el('.main__card_block');
     let date, ms;
@@ -335,7 +336,6 @@ function createChartDynamics(newArr, months, dynamics, wid) {
   setChildren(chartWithLabels, [canvas, xAxis]);
   setChildren(chartBlock, [chartWithLabels, yAxis]);
   setChildren(dynamics, [titleChart, chartBlock]);
-
   return dynamics;
 }
 
@@ -358,7 +358,7 @@ export function createTableOfHistory(data, historyOfTransactions) {
     transactions.map((item) =>
       el('tr', [
         el('td', { class: 'js-transFrom' }, item.from),
-        el('td', item.to),
+        el('td', { class: 'js-transTo' }, item.to),
         el('td', { class: 'js-amountTrans' }, item.amount),
         el(
           'td',
@@ -428,7 +428,7 @@ async function createForm(form) {
 export async function checkAccount(n, m) {
   let { autocomplete } = await import('./js/autocomplete.js');
   let { getDataOfAccount } = await import('./js/api.js');
-  let { writeInputValues } = await import('./js/handlers.js');
+  let { writeInputValues, determinePaySys } = await import('./js/handlers.js');
   let data = await getDataOfAccount();
   let dataForChart = await getBalance(data, n, m);
   let { sendMoney, showDynamics, validateFormTrans } = await import(
@@ -445,8 +445,12 @@ export async function checkAccount(n, m) {
     blockOfData = el('.main__block-data');
   }
 
-  const form = el('form.form_trans', { class: 'options', autocomplete: 'off' });
-  const dynamics = el('section.main__dynamics');
+  const form = el('form.form_trans', {
+    class: 'options',
+    autocomplete: 'off',
+    draggable: 'true',
+  });
+  const dynamics = el('section.main__dynamics', { draggable: 'true' });
   const historyOfTransactions = el('.main__history', { class: 'options' });
 
   createChartDynamics(dataForChart.newArr, dataForChart.months, dynamics, 510);
@@ -468,6 +472,11 @@ export async function checkAccount(n, m) {
     setChildren(block, [wrap, blockOfData]);
   }
 
+  let min = document.querySelector('.min');
+  if (min.innerText == '0.000') {
+    min.textContent = '0';
+  }
+
   let arrGlobal = [];
   let storage = localStorage.getItem('records');
   if (storage) {
@@ -481,6 +490,7 @@ export async function checkAccount(n, m) {
 
   createChart(dataForChart.newArr, canvas);
   showTransactions(data);
+  determinePaySys();
   validateFormTrans();
   sendMoney();
   showDynamics();
@@ -491,11 +501,8 @@ export async function checkAccount(n, m) {
     historyOfTransactions.style.display = 'none';
   }
 
-  let observer = new IntersectionObserver(showRow, options);
-  let visual = document.querySelectorAll('.js-visual');
-  let target = visual[visual.length - 1];
-
-  observer.observe(target);
+  drag('.main__dynamics', 'area-chart');
+  setObserver();
 }
 
 function setLabelsForY(selector) {
@@ -590,7 +597,8 @@ function getMonths(currentDate, currentMonth, months, n) {
   return months;
 }
 
-export function showTransactions(data) {
+export async function showTransactions(data) {
+  const accountTo = document.querySelectorAll('.js-transTo');
   const accountFrom = document.querySelectorAll('.js-transFrom');
   const amount = document.querySelectorAll('.js-amountTrans');
 
@@ -616,6 +624,39 @@ export function showTransactions(data) {
       }
     }
   }
+  accountFrom.forEach((elem) => determinePS(elem));
+  accountTo.forEach((elem) => determinePS(elem));
+}
+
+function determinePS(elem) {
+  if (
+    elem.innerText[0] == 2 &&
+    elem.innerText == 16 &&
+    checkWithMoonAlg(elem.innerText) == true
+  ) {
+    elem.classList.add('js-mir');
+  } else if (validator.isCreditCard(`${elem.innerText}`) === true) {
+    if (elem.innerText[0] == 6) {
+      elem.classList.add('js-visa');
+    } else {
+      elem.classList.add('js-mc');
+    }
+  }
+}
+
+export async function createBlocks(blockOfAccounts) {
+  let { getDataOfAccount } = await import('./js/api.js');
+  const data = await getDataOfAccount();
+  const chart = el('section.main__dynamics', { class: 'dynamics--annual' });
+  const dynamicsRatio = el('section.main__ratio');
+  const historyOfTransactions = el('.main__history', { class: 'options' });
+
+  setChildren(blockOfAccounts, [chart, dynamicsRatio, historyOfTransactions]);
+  showHistoryOfBalance(data, chart);
+  showRatio(data, dynamicsRatio);
+  createTableOfHistory(data, historyOfTransactions);
+  showTransactions(data);
+  setObserver();
 }
 
 // OBSERVER
@@ -638,6 +679,14 @@ function showRow(entries, observer) {
     observer.unobserve(entry.target);
     observer.observe(hidden[hidden.length - 1]);
   });
+}
+
+function setObserver() {
+  let observer = new IntersectionObserver(showRow, options);
+  let visual = document.querySelectorAll('.js-visual');
+  let target = visual[visual.length - 1];
+
+  observer.observe(target);
 }
 
 export async function transfer() {
@@ -680,6 +729,11 @@ export async function showHistoryOfBalance(data, dynamics) {
   const canvas = document.querySelector('.main__dynamics canvas');
   createChart(dataForChart.newArr, canvas);
   setLabelsForY('.main__dynamics .yAxis span');
+
+  let min = document.querySelector('.min');
+  if (min.innerText == '0.000') {
+    min.textContent = '0';
+  }
 }
 
 export async function showRatio(data, dynamics) {
@@ -731,14 +785,20 @@ export async function getCurrencyExchange() {
   const block = el('.main__block', {
     class: 'main__block-data main__block-data--currency',
   });
-  const form = el('form.main__form-currency');
+  const form = el('form.main__form-currency', { draggable: 'true' });
   const rows = [];
   createRows(data1, rows);
 
-  const currencies = el('section.main__section-private', [
-    el('h4.main__section_title', 'Ваши валюты'),
-    el('.wrap_ul', [el('ul.main__section_ul', { class: 'list-reset' }, rows)]),
-  ]);
+  const currencies = el(
+    'section.main__section-private',
+    { draggable: 'true' },
+    [
+      el('h4.main__section_title', 'Ваши валюты'),
+      el('.wrap_ul', [
+        el('ul.main__section_ul', { class: 'list-reset' }, rows),
+      ]),
+    ]
+  );
 
   createBlockOfExchangeRates(exchangeRate);
   createFormForCurrencyExchange(form, data2);
@@ -759,10 +819,10 @@ export async function getCurrencyExchange() {
   }
 
   connectSocket(list);
-
   validateFormTrans();
   exchangeCurrency();
 
+  drag('.main__section-private', 'area-currency');
   stopScroll();
   allowScroll();
 }
@@ -900,6 +960,8 @@ export function byTrans(newData, exception) {
     }
     return 0;
   });
-  newData.push(exception);
+  if (exception != undefined) {
+    newData.push(exception);
+  }
   return newData;
 }

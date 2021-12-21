@@ -48,6 +48,7 @@ form {
     min-width: 300px;
     height: 288px;
     grid-area: form;
+    cursor: move;
 
     & .form__container {
       width: 100%;

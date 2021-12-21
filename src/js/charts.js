@@ -29,14 +29,24 @@ export function createStackedChart(objRec, objExp, canvas) {
   axisMin.textContent = `${min} ₽`;
   let maxRec = Math.max.apply(null, objRec);
   let maxExp = Math.max.apply(null, objExp);
-  if (maxRec > maxExp || maxRec == maxExp) {
-    axisSubMax.textContent = `${maxExp.toFixed(0)} ₽`;
+  if (maxRec == 0 || maxExp == 0) {
+    axisSubMax.textContent = '';
   } else if (maxRec < maxExp) {
     axisSubMax.textContent = `${maxRec.toFixed(0)} ₽`;
+  } else if (maxRec > maxExp || maxRec == maxExp) {
+    axisSubMax.textContent = `${maxExp.toFixed(0)} ₽`;
   }
 
   let rec = getTransArray(objRec, maxGeneral, minGeneral);
   let exp = getTransArray(objExp, maxGeneral, minGeneral);
+  let recMax = Math.max.apply(null, rec);
+  let expMax = Math.max.apply(null, exp);
+  if (recMax > expMax) {
+    axisSubMax.style.bottom = `${expMax}px`;
+  } else {
+    axisSubMax.style.bottom = `${recMax}px`;
+  }
+
   //46
   ctx.translate(0, canvas.height);
   ctx.rotate(-Math.PI / 2);
@@ -84,7 +94,7 @@ function compare(ctx, rec, exp, j, value) {
 //++++++=============================================
 
 export function createChartQ(newArr, canvas, color = '#116acc', width = 50) {
-  console.log(typeof width);
+  //console.log(typeof width);
   const ctx = canvas.getContext('2d');
   let spotOn = getTransformedArrayQ(newArr);
 

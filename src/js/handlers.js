@@ -3,14 +3,19 @@ import validator from 'validator';
 import { el, setChildren } from 'redom';
 import { createListOfAccounts, createPanel } from '../index.js';
 import { showSpecificTemplate } from './skeleton.js';
+const checkWithMoonAlg = require('./moon.js');
 
 function delAttr() {
   const submit = document.querySelector('[type="submit"]');
   const successBorder = document.getElementsByClassName('success--border');
+  const accNum = document.getElementById('accNum');
 
   if (submit.innerText === 'Войти' || submit.innerText === 'Отправить') {
     if (successBorder.length === 2) {
       submit.removeAttribute('disabled', 'disabled');
+      if (accNum) {
+        accNum.classList.remove('js-visa', 'js-mir', 'js-mc');
+      }
     }
   } else if(submit.innerText === 'Обменять') {
     if (successBorder.length === 1) {
@@ -188,34 +193,23 @@ export async function sendMoney() {
 }
 
 export async function showDynamics() {
-  let { changePanel } = await import('../index.js');
+  let { changePanel, createBlocks } = await import('../index.js');
   const dynamics = document.querySelector('.main__dynamics');
-  dynamics.addEventListener('click', async () => {
-    history.pushState(null, '', `${window.location.search}&history=true`);
-    const blockOfAccounts = document.querySelector('.main__block-data');
-    blockOfAccounts.classList.add('main__block-data--new');
-    blockOfAccounts.innerHTML = '';
-    changePanel();
-    setTimeout(() => {
-      createBlocks(blockOfAccounts);
-    }, 100)
-  });
-}
+  const table = document.querySelector('table');
+  const array = [dynamics, table];
+  array.forEach(elem => {
+    elem.addEventListener('click', async () => {
+      history.pushState(null, '', `${window.location.search}&history=true`);
+      const blockOfAccounts = document.querySelector('.main__block-data');
+      blockOfAccounts.classList.add('main__block-data--new');
+      blockOfAccounts.innerHTML = '';
+      changePanel();
+      setTimeout(() => {
+        createBlocks(blockOfAccounts);
+      }, 100)
+    });
+  })
 
-async function createBlocks(blockOfAccounts) {
-  let {createTableOfHistory} = await import('../index.js');
-  let { showHistoryOfBalance, showRatio, showTransactions } = await import('../index.js');
-  let { getDataOfAccount } = await import('./api.js');
-  const data = await getDataOfAccount();
-  const chart = el('section.main__dynamics', { class: 'dynamics--annual' });
-  const dynamicsRatio = el('section.main__ratio');
-  const historyOfTransactions = el('.main__history', { class: 'options' });
-
-  setChildren(blockOfAccounts, [chart, dynamicsRatio, historyOfTransactions]);
-  showHistoryOfBalance(data, chart);
-  showRatio(data, dynamicsRatio);
-  createTableOfHistory(data, historyOfTransactions);
-  showTransactions(data)
 }
 
 export function showCurrencyExchange() {
@@ -304,7 +298,7 @@ export async function showATM() {
       src: 'https://api-maps.yandex.ru/2.1/?apikey=0c61dc80-6967-49f4-b0be-8b4ff68d5dda&load=package.standard&lang=ru-RU',
     });
 
-  document.querySelector('main').prepend(script);
+  document.querySelector('main').append(script);
 
   atm.addEventListener('click', async (e) => {
     e.preventDefault();
@@ -412,6 +406,21 @@ export function closeMenu() {
   })
 }
 
+export function determinePaySys() {
+  let numberOfCard = document.getElementById('accNum');
+  numberOfCard.addEventListener('blur', (e) => {
+    let str = numberOfCard.value.replace(/\s+/g, '');
+    if (numberOfCard.value[0] == 2 && checkWithMoonAlg(str) == true) {
+      numberOfCard.classList.add('js-mir');
+    } else if (validator.isCreditCard(`${numberOfCard.value}`) === true) {
+      if (numberOfCard.value[0] == 4) {
+        numberOfCard.classList.add('js-visa');
+      } else {
+        numberOfCard.classList.add('js-mc');
+      }
+    }
+  })
+}
 
 //<script type="text/javascript" charset="utf-8" async src="https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3Af5283b078f08fb4e28eb3d9437c1c6fd8fbf021d209357b4acff6be66702b368&amp;width=100%25&amp;height=728&amp;lang=ru_RU&amp;scroll=true"></script>
 //https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3Af5283b078f08fb4e28eb3d9437c1c6fd8fbf021d209357b4acff6be66702b368&amp;width=100%25&amp;height=728&amp;lang=ru_RU&amp

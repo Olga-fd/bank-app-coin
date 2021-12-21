@@ -24,7 +24,7 @@ export async function authorize(myLogin, myPassword) {
       }),
     });
     data = await response.json();
-    console.log(data);
+    //console.log(data);
     tokenId = data.payload.token;
     createHeader();
     createListOfAccounts();
@@ -107,11 +107,11 @@ export async function transferFunds(accFrom, accTo, amount) {
   let data = await response.json();
 
   if (data.payload !== null) {
-    console.log(data.payload !== null);
+    //console.log(data.payload !== null);
     return data;
   } else {
     let { showErrorForTransfer } = await import('./errors.js');
-    console.log(data);
+    //console.log(data);
     showErrorForTransfer(data.error);
   }
 }
@@ -198,11 +198,11 @@ export async function buyCurrency(currencyFrom, currencyTo, amountToTransfer) {
   });
   let data = await response.json();
   if (data.payload !== null) {
-    console.log(data.payload !== null);
+    //console.log(data.payload !== null);
     return data;
   } else {
     let { showErrorForCurrency } = await import('./errors.js');
-    console.log(data);
+    //console.log(data);
     showErrorForCurrency(data.error);
   }
 }
@@ -221,7 +221,7 @@ export async function getCoordinates() {
       }),
     });
     let data = await response.json();
-    console.log(data);
+    //console.log(data);
     return data;
   } catch (err) {
     alert(err.message);
