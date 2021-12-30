@@ -4,4 +4,6 @@ module.exports = {
     '\\.js$': 'babel-jest',
   },
   testEnvironment: 'jsdom',
+  testPathIgnorePatterns: ['<rootDir>/cypress/'],
+  testRegex: '(/__tests__/.*|(\\.|/)(test))\\.js$',
 };

@@ -14,10 +14,12 @@ export function autocomplete(inp, arr) {
 
     for (let i = 0; i < arr.length; i++) {
       if (arr[i].substr(0, val.length) == val) {
-        let anotherDiv = document.createElement('DIV');
-        anotherDiv.innerHTML = `<strong> ${arr[i].substr(0, val.length)}</strong>`;
-        anotherDiv.innerHTML += arr[i].substr(val.length);
-        anotherDiv.innerHTML += `<input type='hidden' value=${arr[i]}>`;
+        let anotherDiv = el('div', [
+          el('span', [
+            el('strong', arr[i].substr(0, val.length))
+          ], arr[i].substr(val.length)),
+          el('input', {type: 'hidden', value: `${arr[i]}`}),
+        ]);
         anotherDiv.addEventListener('click', function (e) {
           inp.value = this.getElementsByTagName('input')[0].value;
           closeAllLists();

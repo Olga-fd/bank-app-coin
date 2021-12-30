@@ -4,8 +4,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
-//const autoprefixer = require('autoprefixer');
-
 // eslint-disable-next-line no-undef
 module.exports = (env) => ({
   entry: './src/index.js',
@@ -58,13 +56,6 @@ module.exports = (env) => ({
           { loader: 'source-map-loader' },
         ],
       },
-      // {
-      //   test: /\.css$/i,
-      //   use: [
-      //     env.prod ? MiniCssExtractPlugin.loader : 'style-loader',
-      //     'css-loader'
-      //   ],
-      // },
       {
         test: /\.scss$/i,
         use: [
@@ -72,24 +63,12 @@ module.exports = (env) => ({
           process.env.NODE_ENV !== 'production'
             ? 'style-loader'
             : MiniCssExtractPlugin.loader,
-          // 'css-loader',
           {
             loader: 'css-loader',
-            options: { importLoaders: 1, sourceMap: true },
+            options: { importLoaders: 1 },
           },
-          // {
-          //   loader: 'postcss-loader',
-          //   options: {
-          //     postcssOptions: {
-          //       plugins: [
-          //         autoprefixer({
-          //           browsers: ['ie >= 10', 'last 4 version'],
-          //         }),
-          //       ],
-          //     },
-          //   },
-          // },
           'sass-loader',
+          'postcss-loader',
         ],
       },
       {
@@ -104,15 +83,6 @@ module.exports = (env) => ({
     maxEntrypointSize: 512000,
   },
   devServer: {
-    // https: {
-    //   key: readFileSync('../.ssl/cert.key'),
-    //   cert: readFileSync('../.ssl/cert.crt'),
-    //   cacert: readFileSync('../.ssl/ca.crt'),
-    // },
-    // headers: {
-    //   'Access-Control-Allow-Private-Network': true,
-    //   'Access-Control-Allow-Origin': '*',
-    // },
     historyApiFallback: true,
     hot: true,
   },

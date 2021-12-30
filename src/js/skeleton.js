@@ -1,3 +1,5 @@
+import { el, setChildren } from 'redom';
+
 export async function showTemplate() {
   const template = document.getElementById('template');
   const blockOfAccounts = document.querySelector('.main__block');
@@ -23,6 +25,14 @@ export function createTemplate() {
       <div class="skeleton-btn skeleton"></div>
     </div>
   `;
+
+  // setChildren(template, { id: 'template' }, [
+  //   el('.skeleton-card', { class: 'skeleton' }, [
+  //     el('.skeleton-text', { class: 'skeleton' }),
+  //     el('.skeleton-text', { class: 'skeleton' }),
+  //     el('.skeleton-btn', { class: 'skeleton' }),
+  //   ]),
+  // ]);
   container.append(template);
 }
 

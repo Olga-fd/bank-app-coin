@@ -39,7 +39,6 @@
     "postcss-loader": "^6.2.0",
     "postcss-preset-env": "^7.0.2",
     "prettier": "^2.4.1",
-    "sass-loader": "^12.2.0",
     "source-map-loader": "^3.0.0",
     "style-loader": "^3.2.1",
     "webpack": "^5.52.0",
@@ -48,6 +47,8 @@
   },
   "dependencies": {
     "redom": "^3.27.1",
+    "sass": "^1.45.1",
+    "sass-loader": "^12.4.0",
     "validator": "^13.7.0"
   }
 }

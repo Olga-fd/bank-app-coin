@@ -13,6 +13,9 @@ describe('Онлайн-банк Coin', () => {
     // enter valid login and password
     cy.get('#login').type('developer{enter}');
     cy.get('#password').type('skillbox{enter}');
+
+    // cy.get('#login').click();
+    // cy.get('#password').click();
     cy.get('body').click();
     cy.contains('button', 'Войти').click();
 
@@ -98,62 +101,90 @@ describe('Онлайн-банк Coin', () => {
       });
   });
 
-  // it('Открыть историю баланса', () => {
-  //   cy.contains('Открыть').click();
-  //   cy.get('canvas').click();
-  //   cy.contains('История баланса').should('be.visible');
-  // });
+  it('Сделать перевод с нового счета', () => {
+    cy.get('.main__block .main__card:last-child .main__card_number').then(
+      ($num) => {
+        const number = $num.text();
+        cy.get('.main__block .main__card:first-child .main__btn-open').click();
+        cy.get('#accNum').type(`${number}{enter}`);
+        cy.get('#amountTrans').type(`100{enter}`);
+        cy.get('form').click();
+        cy.contains('button', 'Отправить').click();
+        cy.contains('button', 'Вернуться назад').click();
+        cy.clock().then((clock) => {
+          clock.tick(1000);
+          cy.contains('div', `${number}`).contains('p', '100 ₽');
+          cy.get('.main__block .main__card:last-child')
+            .contains('Открыть')
+            .click();
 
-  // it('Вернуться из истории баланса', () => {
-  //   cy.get('.main__btn').click();
-  //   cy.contains('Просмотр счета').should('be.visible');
-  // });
+          cy.get('#accNum').type(`5555341244441115{enter}`);
+          cy.get('#amountTrans').type(`50{enter}`);
+          cy.get('form').click();
+          cy.contains('button', 'Отправить').click();
+          cy.contains('button', 'Вернуться назад').click();
+          cy.contains('div', `${number}`).contains('p', '50 ₽');
+        });
+      }
+    );
+  });
 
-  // it('Перевести деньги со счета', () => {
-  //   cy.get('#accNum')
-  //     .type('76026742637317620200610516{enter}')
-  //     .blur()
-  //     .should('have.class', 'success--border');
-  //   cy.get('#amountTrans')
-  //     .type('100{enter}')
-  //     .blur()
-  //     .should('have.class', 'success--border');
-  //   cy.get('.send').click();
-  //   cy.get('#accNum').should('not.have.class', 'success--border');
-  // });
+  it('Открыть историю баланса', () => {
+    cy.contains('Открыть').click();
+    cy.get('canvas').click();
+    cy.contains('История баланса').should('be.visible');
+  });
 
-  // it('Показать ошибку при переводе средств на несуществующий счет', () => {
-  //   cy.get('#accNum').type('76026{enter}');
-  //   cy.get('#amountTrans').type('100{enter}');
-  //   cy.get('form').click();
-  //   cy.get('.send').click();
-  //   cy.get('#accNum').should('have.class', 'error--border');
-  //   cy.get('.js-notification').should('be.visible');
-  //   cy.get('.js-icon').should('be.visible');
-  // });
+  it('Вернуться из истории баланса', () => {
+    cy.get('.main__btn').click();
+    cy.contains('Просмотр счета').should('be.visible');
+  });
 
-  // it('Открыть карту с банкоматами', () => {
-  //   cy.get('.atm').click();
-  //   cy.contains('Карта банкоматов').should('be.visible');
-  //   cy.get('ymaps').should('be.visible');
-  //   cy.location('pathname').should('equal', '/index.html/ATM');
-  // });
+  it('Перевести деньги со счета', () => {
+    cy.get('#accNum')
+      .type('76026742637317620200610516{enter}')
+      .blur()
+      .should('have.class', 'success--border');
+    cy.get('#amountTrans')
+      .type('100{enter}')
+      .blur()
+      .should('have.class', 'success--border');
+    cy.get('.send').click();
+    cy.get('#accNum').should('not.have.class', 'success--border');
+  });
 
-  // it('Открыть страницу с валютным обменом', () => {
-  //   cy.get('.currency').click();
-  //   cy.contains('Валютный обмен').should('be.visible');
-  //   cy.location('pathname').should('equal', '/index.html/currency');
-  // });
+  it('Показать ошибку при переводе средств на несуществующий счет', () => {
+    cy.get('#accNum').type('76026{enter}');
+    cy.get('#amountTrans').type('100{enter}');
+    cy.get('form').click();
+    cy.get('.send').click();
+    cy.get('#accNum').should('have.class', 'error--border');
+    cy.get('.js-notification').should('be.visible');
+    cy.get('.js-icon').should('be.visible');
+  });
 
-  // it('Обменять валюту', () => {
-  //   cy.get('.first').click();
-  //   cy.get('.select-items div').contains('BTC').click();
-  //   cy.get('.first .same-as-selected').should('have.text', 'BTC');
-  //   cy.get('.second').click();
-  //   cy.get('.second .select-items').find(':contains("RUB")').click();
-  //   cy.get('.second .same-as-selected').should('have.text', 'RUB');
-  //   cy.get('.form__input').type('5{enter}');
-  //   cy.get('.form__legend').click();
-  //   cy.get('.send').click();
-  // });
+  it('Открыть карту с банкоматами', () => {
+    cy.get('.atm').click();
+    cy.contains('Карта банкоматов').should('be.visible');
+    cy.get('ymaps').should('be.visible');
+    cy.location('pathname').should('equal', '/index.html/ATM');
+  });
+
+  it('Открыть страницу с валютным обменом', () => {
+    cy.get('.currency').click();
+    cy.contains('Валютный обмен').should('be.visible');
+    cy.location('pathname').should('equal', '/index.html/currency');
+  });
+
+  it('Обменять валюту', () => {
+    cy.get('.first').click();
+    cy.get('.select-items div').contains('BTC').click();
+    cy.get('.first .same-as-selected').should('have.text', 'BTC');
+    cy.get('.second').click();
+    cy.get('.second .select-items').find(':contains("RUB")').click();
+    cy.get('.second .same-as-selected').should('have.text', 'RUB');
+    cy.get('.form__input').type('5{enter}');
+    cy.get('.form__legend').click();
+    cy.get('.send').click();
+  });
 });

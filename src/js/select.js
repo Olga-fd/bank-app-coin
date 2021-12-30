@@ -7,7 +7,7 @@ export function createSelect(block) {
     /* For each element, create a new DIV that will act as the selected item: */
     const selected = document.createElement('div');
     selected.setAttribute('class', 'select-selected');
-    selected.innerHTML = selElmnt.options[selElmnt.selectedIndex].innerHTML;
+    selected.textContent = selElmnt.options[selElmnt.selectedIndex].innerText;
     block[i].appendChild(selected);
 
     /* For each element, create a new DIV that will contain the option list: */
@@ -17,7 +17,7 @@ export function createSelect(block) {
       /* For each option in the original select element,
     create a new DIV that will act as an option item: */
       const optionName = document.createElement('div');
-      optionName.innerHTML = selElmnt.options[j].innerHTML;
+      optionName.textContent = selElmnt.options[j].innerText;
       optionName.addEventListener('click', function () {
         /* When an item is clicked, update the original select box,
         and the selected item: */
@@ -26,9 +26,9 @@ export function createSelect(block) {
 
         const prevSibl = this.parentNode.previousSibling;
         for (let i = 0; i < select.length; i++) {
-          if (select.options[i].innerHTML == this.innerHTML) {
+          if (select.options[i].innerText == this.innerText) {
             select.selectedIndex = i;
-            prevSibl.innerHTML = this.innerHTML;
+            prevSibl.textContent = this.innerText;
             const sameSel =
               this.parentNode.getElementsByClassName('same-as-selected');
 
