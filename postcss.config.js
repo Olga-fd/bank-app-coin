@@ -1,11 +1,5 @@
 /* eslint-disable no-undef */
-// module.exports = {
-//   plugins: {
-//     'post-css-preset-env': {
-//       browsers: 'last 2 versions',
-//     },
-//   },
-// };
+const postcssPresetEnv = require('postcss-preset-env');
 module.exports = {
-  plugins: ['postcss-preset-env'],
+  plugins: [postcssPresetEnv()],
 };

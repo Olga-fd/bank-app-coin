@@ -10,7 +10,7 @@ module.exports = (env) => ({
   output: {
     clean: true,
     filename: 'main.[contenthash].js',
-    publicPath: '/',
+    publicPath: './',
   },
   plugins: [
     new ImageMinimizerPlugin({
@@ -40,7 +40,7 @@ module.exports = (env) => ({
     rules: [
       {
         test: /\.js$/,
-        enforce: 'pre',
+        //enforce: 'pre',
         exclude: /node_modules/,
         use: [
           {
@@ -53,22 +53,21 @@ module.exports = (env) => ({
               ],
             },
           },
-          { loader: 'source-map-loader' },
+          //{ loader: 'source-map-loader' },
         ],
       },
       {
         test: /\.scss$/i,
         use: [
           // fallback to style-loader in development
-          process.env.NODE_ENV !== 'production'
-            ? 'style-loader'
-            : MiniCssExtractPlugin.loader,
+          env.prod ? MiniCssExtractPlugin.loader : 'style-loader',
+          //MiniCssExtractPlugin.loader,
           {
             loader: 'css-loader',
-            options: { importLoaders: 1 },
+            options: { importLoaders: 1, sourceMap: true },
           },
-          'sass-loader',
           'postcss-loader',
+          'sass-loader',
         ],
       },
       {
