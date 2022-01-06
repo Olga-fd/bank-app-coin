@@ -28,6 +28,8 @@ export async function createNewAccount() {
   let { createAccount } = await import('./api.js');
   const btn = document.querySelector('.main__btn');
   btn.addEventListener('click', () => {
+    //const blockOfAccounts = document.querySelector('.main__block');
+   //blockOfAccounts.innerHTML = '';
     createAccount();
     createListOfAccounts();
   });
@@ -38,6 +40,7 @@ export async function showAccounts() {
   accounts.addEventListener('click', (e) => {
     e.preventDefault();
     history.pushState(null, '', './accounts');
+    //document.querySelector('main .container').innerHTML = '';
     createPanel();
     createListOfAccounts();
   });
@@ -68,6 +71,22 @@ export async function returnFromHistory() {
     checkAccount(5, 6);
   });
 }
+// export function changeURL() {
+//   window.addEventListener('popstate', async function () {
+//     // console.log("location: " + location.href + ", state: " + JSON.stringify(event.state));
+//     //history.pushState({page: 1}, "title 1", `${window.location.search}`);
+//     let { checkAccount } = await import('../index.js');
+//     let { getDataWithAccounts } = await import('./api.js');
+//     const pageParams = new URLSearchParams(window.location.search);
+//     if (pageParams.get('accounts')) {
+//       document.querySelector('body').innerHTML = '';
+//       getDataWithAccounts();
+//     } else if (pageParams.get('id')) {
+//       document.querySelector('main container').innerHTML = '';
+//       checkAccount();
+//     }
+//   });
+// }
 
 export async function openAccount(blockOfAccounts) {
   let { modifyPanel, checkAccount } = await import('../index.js');
@@ -113,6 +132,7 @@ export function validate() {
 
 export function validateFormTrans() {
   const formInputs = document.querySelectorAll('.form__input');
+  //const accNum = document.getElementById('accNum').value.length;|| accNum < 16
   formInputs.forEach((input) => {
     input.addEventListener('blur', () => {
       const lengthInput = validator.isLength(input.value);
@@ -121,6 +141,10 @@ export function validateFormTrans() {
 
       if (lengthInput == false || space == true || isNumeric == false || input.value <= 0 ) {
         input.classList.add('error--border');
+      // console.log(lengthInput == false);
+      // console.log(space == true);
+      // console.log(isNumeric == false);
+      // console.log(input.value <= 0);
       } else {
         input.classList.add('success--border');
       }
@@ -136,6 +160,28 @@ export function validateFormTrans() {
     });
   })
 }
+
+// export function validateSum() {
+//   const formInput = document.querySelector('.form__input');
+//   const btn = document.querySelector('[type="submit"]');
+//   formInput.addEventListener('blur', () => {
+//     if (parseInt(formInput.value.trim()) > 0 && typeof parseInt(formInput.value.trim()) == 'number'
+//     ) {
+//       formInput.classList.remove('error--border');
+//       formInput.classList.add('success--border');
+
+//       btn.removeAttribute('disabled', 'disabled');
+//     } else {
+//       formInput.classList.remove('success--border');
+//       formInput.classList.add('error--border');
+//       return;
+//     }
+//   });
+  // formInput.addEventListener('focus', () => {
+  //   let elem = document.activeElement;
+  //   if (elem !== btn) cleanError(elem);
+  // }, true);
+//}
 
 export async function sendMoney() {
   let { transfer } = await import('../index.js');
@@ -171,7 +217,7 @@ export function showCurrencyExchange() {
   currency.addEventListener('click', async (e) => {
     e.preventDefault();
     history.pushState(null, '', './currency');
-    //document.querySelector('main .container').innerHTML = '';
+    document.querySelector('main .container').innerHTML = '';
     let { createCurrencyTemplate } = await import('./skeleton.js');
     let { getCurrencyExchange } = await import('../index.js');
     createCurrencyTemplate();
@@ -258,6 +304,7 @@ export async function showATM() {
     e.preventDefault();
     //main.innerHTML = '';
     history.pushState(null, '', '../index.html/ATM');
+    //history.pushState(null, '', '../ATM');
     createBankTemplate();
     showSpecificTemplate('template4', 'main .container');
 
@@ -305,6 +352,7 @@ export function sortByKey() {
   const options = document.querySelectorAll('.select-items div');
 
   options.forEach(option => option.addEventListener('click', () => {
+    //main.innerHTML = '';
     createListOfAccounts();
   })
   )
@@ -337,6 +385,7 @@ export function pushBtn(burger) {
 
 window.addEventListener('popstate', async function () {
   if (window.location.pathname.includes('index.html/')) {
+    //document.querySelector('main .container').innerHTML = '';
     history.pushState(null, '', './accounts');
     document.querySelector('.active').classList.remove('active');
     document.querySelector('.accounts').classList.add('active');
@@ -373,3 +422,6 @@ export function determinePaySys() {
     }
   })
 }
+
+//<script type="text/javascript" charset="utf-8" async src="https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3Af5283b078f08fb4e28eb3d9437c1c6fd8fbf021d209357b4acff6be66702b368&amp;width=100%25&amp;height=728&amp;lang=ru_RU&amp;scroll=true"></script>
+//https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3Af5283b078f08fb4e28eb3d9437c1c6fd8fbf021d209357b4acff6be66702b368&amp;width=100%25&amp;height=728&amp;lang=ru_RU&amp

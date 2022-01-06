@@ -10,7 +10,7 @@ module.exports = (env) => ({
   output: {
     clean: true,
     filename: 'main.[contenthash].js',
-    publicPath: './',
+    //publicPath: './',
   },
   plugins: [
     new ImageMinimizerPlugin({

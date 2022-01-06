@@ -7,7 +7,8 @@
     "dev": "webpack serve --mode=development",
     "lint": "eslint ./src",
     "lint:fix": "eslint ./src --fix",
-    "test": "jest"
+    "test": "jest",
+    "serve": "set PORT=3005 && serve dist"
   },
   "author": "Olga",
   "devDependencies": {
@@ -49,6 +50,7 @@
     "redom": "^3.27.1",
     "sass": "^1.45.1",
     "sass-loader": "^12.4.0",
+    "serve": "^13.0.2",
     "validator": "^13.7.0"
   }
 }
