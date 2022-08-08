@@ -1,0 +1,156 @@
+
+form {
+  //outline: 2px dashed blue;
+}
+.form {
+  width: 500px;
+  height: 366px;
+  margin: auto;
+
+  &__fieldset {
+    & .btn {
+      margin-left: 7.4em;
+    }
+  }
+
+  &__legend {
+    padding-top: 36px;
+    padding-bottom: 29px;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 40px;
+    text-align: center;
+
+  }
+
+  &__container {
+    display: flex;
+    flex-flow: column;
+    align-items: flex-end;
+    width: 85%;
+  }
+
+  &__label-box {
+    position: relative;
+    display: inline-block;
+    margin-right: 0;
+
+  }
+
+  &__label {
+    display: inline-block;
+    padding-right: 18px;
+    font-weight: 700;
+  }
+
+  &_trans {
+    width: 600px;
+    min-width: 300px;
+    height: 288px;
+    grid-area: form;
+    cursor: move;
+
+    & .form__container {
+      width: 100%;
+      margin-top: -2%;
+    }
+
+    & fieldset {
+      padding: 25px 50px;
+    }
+
+    & legend {
+      padding-top: 17px;
+      padding-bottom: 5px;
+      font-size: 20px;
+      text-align: left;
+    }
+
+    & .form__label-box {
+      padding-bottom: 25px;
+    }
+
+    & .btn {
+      margin-left: 12.4em;
+    }
+
+    & .form__label {
+      font-family: $ubuntu;
+      font-size: 14.9px;
+      font-weight: 600;
+      padding-right: 18px;
+    }
+  }
+}
+
+fieldset {
+  border: none;
+}
+
+#login {
+  margin-bottom: 25px;
+}
+
+#password {
+  margin-bottom: 30px;
+}
+
+#accNum,
+#amountTrans {
+  display: inline-block;
+}
+
+#accNum {
+  position: relative;
+}
+
+.form__grid-container {
+  display: grid;
+  grid-template-columns:  22.375rem 6.5rem;
+  grid-template-rows: 44px 44px;
+  grid-template-areas: 'label1  btn'
+                       'label2 btn';
+  grid-auto-flow: row;
+  gap: 25px;
+
+  & .form__label-box:first-child {
+    grid-area: label1;
+  }
+
+  & .form__label-box:nth-child(2) {
+    grid-area: label2;
+
+    & .form__label {
+      padding-right: 5px;
+    }
+  }
+
+  & .btn {
+    display: inline-block;
+    width: 104px;
+    height: 113px;
+    margin-left: 0;
+    padding: 47px 13px;
+    grid-area: btn;
+  }
+
+  & .custom-select {
+    width: 134px;
+  }
+
+}
+
+@media (min-width: 320px) and (max-width: 480px) {
+  .form {
+    width: 100%;
+
+    &__container {
+      width: 99%;
+      align-items: flex-start;
+
+      & input {
+        width: 15rem;
+      }
+    }
+  }
+}
