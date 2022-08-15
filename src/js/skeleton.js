@@ -26,13 +26,6 @@ export function createTemplate() {
     </div>
   `;
 
-  // setChildren(template, { id: 'template' }, [
-  //   el('.skeleton-card', { class: 'skeleton' }, [
-  //     el('.skeleton-text', { class: 'skeleton' }),
-  //     el('.skeleton-text', { class: 'skeleton' }),
-  //     el('.skeleton-btn', { class: 'skeleton' }),
-  //   ]),
-  // ]);
   container.append(template);
 }
 
