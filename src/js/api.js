@@ -1,8 +1,4 @@
 export let tokenId;
-//import ErrorComponent from './errors.js';
-
-//'Authorization': 'Basic ZGV2ZWxvcGVyOnNraWxsYm94'
-
 export async function authorize(myLogin, myPassword) {
   let { createHeader, createListOfAccounts } = await import('../index.js');
   let data;
@@ -24,7 +20,6 @@ export async function authorize(myLogin, myPassword) {
       }),
     });
     data = await response.json();
-    //console.log(data);
     tokenId = data.payload.token;
     createHeader();
     createListOfAccounts();
@@ -107,11 +102,9 @@ export async function transferFunds(accFrom, accTo, amount) {
   let data = await response.json();
 
   if (data.payload !== null) {
-    //console.log(data.payload !== null);
     return data;
   } else {
     let { showErrorForTransfer } = await import('./errors.js');
-    //console.log(data);
     showErrorForTransfer(data.error);
   }
 }
@@ -148,36 +141,6 @@ export async function getExchangeRates() {
   return data;
 }
 
-// function connectSocket(param, subject, method) {
-//   let socket = new WebSocket('ws://127.0.0.1:3000/currency-feed');
-//   socket.onopen = function (e) {
-//     alert('[open] Соединение установлено');
-//     alert('Отправляем данные на сервер');
-//     socket.send('Меня зовут Джон');
-//   };
-
-//   socket.onmessage = function (event) {
-//     console.log(event.data);
-//     alert(`[message] Данные получены с сервера: ${event.data}`);
-//   };
-
-//   socket.onclose = function (event) {
-//     if (event.wasClean) {
-//       alert(
-//         `[close] Соединение закрыто чисто, код=${event.code} причина=${event.reason}`
-//       );
-//     } else {
-//       // например, сервер убил процесс или сеть недоступна
-//       // обычно в этом случае event.code 1006
-//       alert('[close] Соединение прервано');
-//     }
-//   };
-
-//   socket.onerror = function (error) {
-//     alert(`[error] ${error.message}`);
-//   };
-// }
-
 export async function buyCurrency(currencyFrom, currencyTo, amountToTransfer) {
   let response = await fetch('http://127.0.0.1:3000/currency-buy', {
     method: 'POST',
@@ -198,11 +161,9 @@ export async function buyCurrency(currencyFrom, currencyTo, amountToTransfer) {
   });
   let data = await response.json();
   if (data.payload !== null) {
-    //console.log(data.payload !== null);
     return data;
   } else {
     let { showErrorForCurrency } = await import('./errors.js');
-    //console.log(data);
     showErrorForCurrency(data.error);
   }
 }
@@ -221,7 +182,6 @@ export async function getCoordinates() {
       }),
     });
     let data = await response.json();
-    //console.log(data);
     return data;
   } catch (err) {
     alert(err.message);
