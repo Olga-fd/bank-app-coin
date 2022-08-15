@@ -1,5 +1,3 @@
-// /* eslint-disable prettier/prettier */
-
 export function showErrorForAuthorization(error) {
   const inputs = document.querySelectorAll('.form__input');
   const selectors = document.querySelectorAll('.js-notification');
