@@ -10,7 +10,6 @@ const checkWithMoonAlg = require('./js/moon.js');
 
 export async function createLoginScreen() {
   history.pushState(null, '', '../index.html');
-  //history.pushState(null, '', '../');
   let { validate, submitForm } = await import('./js/handlers.js');
   const header = el('header.header');
   const container = el('.container', { class: 'flex-container' });
@@ -92,7 +91,6 @@ export async function createHeader() {
       el(
         'a.header__link',
         {
-          //href: 'http://localhost:8080/index.html/accounts',
           class: 'accounts active',
         },
         'Счета'
@@ -219,55 +217,8 @@ export async function createListOfAccounts() {
     createCardBlock(data.payload, cards, blockOfAccounts);
   }
 
-  // for (let i = 0; i < data.payload.length; i++) {
-  //   let cardBlock = el('.main__card_block');
-  //   let date, ms;
-  //   let length = data.payload[i].transactions.length;
-  //   if (length !== 0) {
-  //     ms = new Date(data.payload[i].transactions[length - 1].date);
-  //     date = new Date(data.payload[i].transactions[length - 1].date)
-  //       .toLocaleString('ru', {
-  //         day: 'numeric',
-  //         month: 'long',
-  //         year: 'numeric',
-  //       })
-  //       .slice(0, -2);
-  //   } else {
-  //     date = 'Данные отсутствуют';
-  //   }
-
-  //   let card = el('.main__card');
-  //   let number = el('h3.main__card_number', data.payload[i].account);
-  //   let amount = el(
-  //     'p.main__card_balance',
-  //     `${data.payload[i].balance.toLocaleString('ru')} ₽`
-  //   );
-  //   let btnOpen = el(
-  //     'a.btn',
-  //     { class: 'main__btn-open', href: `?id=${data.payload[i].account}` },
-  //     'Открыть'
-  //   );
-
-  //   let dateOfTransaction = el('div.main__trans-block', [
-  //     el('h4.main__transaction', 'Последняя транзакция:'),
-  //     el(
-  //       'time.main__trans-date',
-  //       { 'data-date': `${new Date(ms).getTime()}` },
-  //       `${date}`
-  //     ),
-  //   ]);
-  //   setChildren(cardBlock, [dateOfTransaction, btnOpen]);
-  //   setChildren(card, [number, amount, cardBlock]);
-  //   setChildren(blockOfAccounts, card);
-  //   cards.push(card);
-  // }
-  // setChildren(blockOfAccounts, cards);
-  // openAccount(blockOfAccounts);
-}
-
 async function createCardBlock(array, cards, blockOfAccounts) {
   let { openAccount } = await import('./js/handlers.js');
-  //console.log(array);
   for (let i = 0; i < array.length; i++) {
     let cardBlock = el('.main__card_block');
     let date, ms;
@@ -673,8 +624,7 @@ function showRow(entries, observer) {
   entries.forEach((entry) => {
     const table = document.querySelector('table');
     const hidden = table.getElementsByClassName('visually-hidden');
-    // console.log(hidden[0] instanceof Element);
-
+    
     if (entry.isIntersecting) {
       for (let j = 0; j < 25; j++) {
         hidden[j].classList.remove('visually-hidden');
