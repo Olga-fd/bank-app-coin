@@ -47,7 +47,6 @@ export function createStackedChart(objRec, objExp, canvas) {
     axisSubMax.style.bottom = `${recMax - 4}px`;
   }
 
-  //46
   ctx.translate(0, canvas.height);
   ctx.rotate(-Math.PI / 2);
   compare(ctx, rec, exp, 0, 35);
@@ -91,10 +90,7 @@ function compare(ctx, rec, exp, j, value) {
   }
 }
 
-//++++++=============================================
-
 export function createChartQ(newArr, canvas, color = '#116acc', width = 50) {
-  //console.log(typeof width);
   const ctx = canvas.getContext('2d');
   let spotOn = getTransformedArrayQ(newArr);
 
