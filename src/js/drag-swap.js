@@ -7,7 +7,6 @@ export function drag(elem, area) {
   function handleDragStart(e) {
     this.style.opacity = '0';
     dragSrcEl = this;
-    //e.dataTransfer.effectAllowed = 'move';
   }
 
   function handleDragOver(e) {
