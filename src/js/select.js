@@ -1,6 +1,5 @@
 export function createSelect(block) {
   /* Look for any elements with the class "custom-select": */
-  //const block = document.getElementsByClassName('custom-select');
   for (let i = 0; i < block.length; i++) {
     const selElmnt = block[i].getElementsByTagName('select')[0];
 
@@ -14,7 +13,7 @@ export function createSelect(block) {
     const blockItems = document.createElement('div');
     blockItems.setAttribute('class', 'select-items select-hide');
     for (let j = 1; j < selElmnt.length; j++) {
-      /* For each option in the original select element,
+     /* For each option in the original select element,
     create a new DIV that will act as an option item: */
       const optionName = document.createElement('div');
       optionName.textContent = selElmnt.options[j].innerText;
