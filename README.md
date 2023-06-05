@@ -12,7 +12,7 @@
   
   * Enable Access-Control-[Allow/Expose]-Headers.
   
-3. Склонируйте данный репозиторий к себе на диск. Затем выполните `npm init` для установки и `npm run build'. Запускаем index.html из папки /dist c помощью web-сервера. Если установлен VSCode, то можно с помощью LiveServer. 
+3. Запускаем index.html из папки /dist c помощью web-сервера. Если установлен VSCode, то можно с помощью LiveServer. 
 
 4. Также требуется запустить сервер с данными. Необходимо зайти в папку 'js-advanced-diploma-master'. Выполните `npm init` для установки и `npm start' для запуска сервера. По умолчанию сервер слушает на 3000-ом порту localhost.  
 
